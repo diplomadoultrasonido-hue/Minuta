@@ -64,11 +64,22 @@ git push -u origin main
 - La sesión se guarda en una cookie firmada (nadie puede falsificarla sin
   conocer `SESSION_SECRET`) y dura 30 días. El botón **"Salir"** la cierra.
 
-## Migrar tus compromisos actuales (ya incluido)
+## Migrar tus compromisos actuales (un clic, sin instalar nada)
 
-Este proyecto ya trae, en `scripts/import-data.json`, tus 44 compromisos
-actuales (convertidos desde tu Excel/Google Sheet), incluyendo el historial de
-avances. Para cargarlos a Redis, después de completar los Pasos 1-3 de arriba:
+Este proyecto ya trae, en `scripts/import-data.json`, tus compromisos actuales
+(convertidos desde tu Excel/Google Sheet), incluyendo el historial de avances.
+
+1. Entra a tu app y haz login con la **contraseña de edición**.
+2. Si la minuta está vacía, vas a ver un aviso arriba de la lista:
+   **"Importar compromisos iniciales"**. Dale clic.
+3. Listo — se cargan todos de un solo golpe. El aviso desaparece solo después.
+
+Es seguro: si por error le das clic dos veces, o ya hay compromisos cargados,
+no duplica nada — simplemente no hace nada la segunda vez.
+
+### Alternativa con Node (opcional, si tienes permisos para instalarlo)
+
+Para cargarlos a Redis desde tu computadora, después de completar los Pasos 1-3 de arriba:
 
 1. Instala la CLI de Vercel si no la tienes: `npm i -g vercel`
 2. Dentro de la carpeta del proyecto:
@@ -95,6 +106,13 @@ npm run dev
 ```
 
 Abre http://localhost:3000
+
+## Exportar a Excel
+
+Cualquiera con acceso a la minuta (modo lectura o edición) puede descargar el
+estado actual con el botón **"Exportar a Excel"** en la barra de filtros. Se
+descarga un `.xlsx` con la misma estructura que el Excel original: una hoja
+con los compromisos y otra hoja "Historial" con todos los avances.
 
 ## Notas
 

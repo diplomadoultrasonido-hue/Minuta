@@ -6,24 +6,33 @@ export default function handler(req, res) {
     return;
   }
 
-  const { password, editPassword } = req.body || {};
+  try {
+    const { password, editPassword } = req.body || {};
 
-  const viewPassword = process.env.VIEW_PASSWORD;
-  const editPasswordEnv = process.env.EDIT_PASSWORD;
+    const viewPassword = process.env.VIEW_PASSWORD;
+    const editPasswordEnv = process.env.EDIT_PASSWORD;
 
-  if (!viewPassword) {
-    res.status(500).json({ error: 'El servidor no tiene configurada VIEW_PASSWORD' });
-    return;
+    if (!viewPassword) {
+      res.status(500).json({ error: 'El servidor no tiene configurada VIEW_PASSWORD' });
+      return;
+    }
+    if (!process.env.SESSION_SECRET) {
+      res.status(500).json({ error: 'El servidor no tiene configurada SESSION_SECRET' });
+      return;
+    }
+
+    if (password !== viewPassword) {
+      res.status(401).json({ error: 'Contraseña incorrecta' });
+      return;
+    }
+
+    const isEditor = !!editPasswordEnv && !!editPassword && editPassword === editPasswordEnv;
+    const token = createSessionToken(isEditor ? 'editor' : 'viewer');
+
+    res.setHeader('Set-Cookie', sessionCookieHeader(token));
+    res.status(200).json({ ok: true, isEditor });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message || 'Error inesperado al iniciar sesión' });
   }
-
-  if (password !== viewPassword) {
-    res.status(401).json({ error: 'Contraseña incorrecta' });
-    return;
-  }
-
-  const isEditor = !!editPasswordEnv && !!editPassword && editPassword === editPasswordEnv;
-  const token = createSessionToken(isEditor ? 'editor' : 'viewer');
-
-  res.setHeader('Set-Cookie', sessionCookieHeader(token));
-  res.status(200).json({ ok: true, isEditor });
 }

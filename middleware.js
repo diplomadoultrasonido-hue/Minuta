@@ -62,6 +62,10 @@ export const config = {
     '/',
     '/dashboard',
     '/api/data',
-    '/api/compromiso/:path*',
+    '/api/compromiso',
+    '/api/compromiso-update',
+    '/api/compromiso-avance',
+    '/api/import-once',
+    '/api/export',
   ],
 };

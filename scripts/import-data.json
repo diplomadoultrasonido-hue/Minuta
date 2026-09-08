@@ -575,5 +575,18 @@
     "status": "Nuevo",
     "comentarios": "",
     "historial": []
+  },
+  {
+    "id": 45,
+    "fecha": "08/09/2026",
+    "area": "Analista",
+    "tema": "",
+    "compromiso": "Mejorar Diseño de la Minuta",
+    "responsable": "Miguel",
+    "solicitadoPor": "Dr.Jhovan",
+    "promesaCierre": "15/09/2026",
+    "status": "Nuevo",
+    "comentarios": "Soporte Clinico\nOperativo\nProyectos Especiales y Formacion\nEnseñar minuta próxima reunión",
+    "historial": []
   }
 ]

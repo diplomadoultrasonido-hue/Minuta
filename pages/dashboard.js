@@ -104,6 +104,11 @@ const BODY_HTML = `
     👁 Estás viendo esta minuta en modo solo lectura — no puedes agregar ni editar compromisos.
   </div>
 
+  <div id="importBanner" style="display:none;background:var(--teal-soft);border:1px solid var(--teal);border-radius:6px;padding:14px 16px;margin-bottom:20px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+    <span style="font-size:13.5px;color:var(--ink);">Aún no hay compromisos cargados. ¿Importar los datos del Excel original?</span>
+    <button class="btn-primary btn-sm" id="btnImportar">Importar compromisos iniciales</button>
+  </div>
+
   <div class="stats" id="stats"></div>
 
   <div class="toolbar">
@@ -115,6 +120,7 @@ const BODY_HTML = `
       <input type="text" id="fBuscar" placeholder="Buscar compromiso, área, responsable o comentario…">
     </div>
     <button class="btn-ghost" id="btnLimpiar">Limpiar filtros</button>
+    <button class="btn-ghost" id="btnExportar">Exportar a Excel</button>
   </div>
 
   <div class="list" id="list"><div class="empty">Cargando compromisos…</div></div>
@@ -398,8 +404,30 @@ export default function Dashboard() {
       try {
         const data = await apiGet('/api/data');
         onData(data);
+        const banner = document.getElementById('importBanner');
+        if (IS_EDITOR && data.compromisos.length === 0) {
+          banner.style.display = 'flex';
+        } else {
+          banner.style.display = 'none';
+        }
       } catch (e) {
         onErrorMsg(e);
+      }
+    }
+
+    async function importarInicial() {
+      const btn = document.getElementById('btnImportar');
+      btn.disabled = true;
+      btn.textContent = 'Importando…';
+      try {
+        const res = await apiSend('/api/import-once', 'POST', {});
+        onData(res);
+        document.getElementById('importBanner').style.display = 'none';
+        toast('Compromisos importados');
+      } catch (e) {
+        toast(e.message || 'No se pudo importar');
+        btn.disabled = false;
+        btn.textContent = 'Importar compromisos iniciales';
       }
     }
 
@@ -490,7 +518,7 @@ export default function Dashboard() {
         promesaCierre: isoToDdmmyyyy(document.getElementById('ePromesa').value),
       };
       try {
-        const res = await apiSend(`/api/compromiso/${editingId}`, 'PUT', updates);
+        const res = await apiSend('/api/compromiso-update', 'POST', { id: editingId, ...updates });
         onData(res);
         toast('Estado actualizado');
       } catch (e) {
@@ -506,7 +534,7 @@ export default function Dashboard() {
         return;
       }
       try {
-        const res = await apiSend(`/api/compromiso/${editingId}/avance`, 'POST', { avance: texto });
+        const res = await apiSend('/api/compromiso-avance', 'POST', { id: editingId, avance: texto });
         onData(res);
         document.getElementById('eAvance').value = '';
         toast('Avance agregado');
@@ -545,6 +573,10 @@ export default function Dashboard() {
     document.getElementById('btnSaveEdit').addEventListener('click', saveEdit);
     document.getElementById('btnSaveAvance').addEventListener('click', saveAvance);
     document.getElementById('btnLogout').addEventListener('click', logout);
+    document.getElementById('btnImportar').addEventListener('click', importarInicial);
+    document.getElementById('btnExportar').addEventListener('click', () => {
+      window.location.href = '/api/export';
+    });
 
     loadAll();
     // No cleanup needed: this page is not remounted while navigating within itself.
