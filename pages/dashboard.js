@@ -33,12 +33,13 @@ const PAGE_STYLES = `
 *{box-sizing:border-box;min-width:0;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s ease, color .25s ease;}
 svg{display:block;}
-.sidebar,.card,.stat-card,.widget,.modal,.mobile-topbar,.bottom-nav,
+.sidebar,.card,.stat-card,.modal,.mobile-topbar,.bottom-nav,
 .toolbar select,.field select,.field input,.field textarea,.search-pill input,
 .icon-btn,.btn-ghost,.badge,.chip .resp-avatar,.avatar{
   transition:background .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
 }
-h1,h2,h3,.num,.brand-name{font-family:'Fraunces',serif;}
+h1,h2,h3,.num{font-family:'Inter',sans-serif;font-weight:600;}
+.brand-name{font-weight:600;}
 button, select, input, textarea{font-family:'Inter',sans-serif;}
 
 /* App shell */
@@ -47,7 +48,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .brand{display:flex;align-items:center;gap:9px;padding:4px 6px 20px;}
 .brand-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),#3a8a94);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .brand-mark svg{width:15px;height:15px;color:#fff;}
-.brand-name{font-size:14.5px;font-weight:500;letter-spacing:-0.01em;}
+.brand-name{font-size:14.5px;letter-spacing:-0.01em;}
 .brand-sub{font-size:10.5px;color:var(--ink-faint);margin-top:-2px;}
 .nav{display:flex;flex-direction:column;gap:2px;margin-top:4px;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;color:var(--ink-soft);font-size:12.5px;font-weight:500;cursor:pointer;position:relative;transition:color .15s ease, background .15s ease;}
@@ -68,7 +69,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 
 .main{padding:24px 30px 90px;max-width:1440px;width:100%;margin:0 auto;}
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
-.page-header h1{font-size:24px;font-weight:500;margin:0 0 3px;letter-spacing:-0.01em;}
+.page-header h1{font-size:24px;margin:0 0 3px;letter-spacing:-0.01em;}
 .page-header .lead{font-size:13px;color:var(--ink-soft);margin:0;}
 .header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
 .search-pill{position:relative;}
@@ -108,31 +109,6 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .stat-card .num{font-size:24px;font-weight:500;margin-top:10px;line-height:1;letter-spacing:-0.01em;}
 .stat-card .lbl{font-size:11.5px;color:var(--ink-soft);margin-top:4px;}
 
-.widgets-row{display:grid;grid-template-columns:1.1fr 1.4fr 1.5fr;gap:10px;margin-bottom:22px;}
-.widget{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;}
-.widget h3{font-size:12.5px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;}
-.widget h3 span.tag{font-size:10.5px;font-weight:500;color:var(--ink-faint);}
-.donut-wrap{display:flex;align-items:center;gap:14px;}
-.donut{width:76px;height:76px;flex-shrink:0;}
-.donut circle{fill:none;stroke-width:9;}
-.donut .bg{stroke:var(--border);}
-.donut .fg{stroke:var(--violet);stroke-linecap:round;transform:rotate(-90deg);transform-origin:50% 50%;stroke-dasharray:219.8;stroke-dashoffset:219.8;animation:donutFill 1.1s cubic-bezier(.2,.7,.2,1) .2s forwards;}
-@keyframes donutFill{to{stroke-dashoffset:var(--offset);}}
-.donut-copy .big{font-size:20px;font-weight:600;letter-spacing:-0.01em;}
-.donut-copy .small{font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
-.due-list{display:flex;flex-direction:column;gap:10px;}
-.due-item{display:flex;align-items:center;gap:9px;font-size:12px;}
-.due-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
-.due-dot.urgent{background:var(--coral);} .due-dot.soon{background:var(--amber);}
-.due-text{flex:1;color:var(--ink);line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.due-days{font-size:10.5px;color:var(--ink-faint);white-space:nowrap;}
-.feed{display:flex;flex-direction:column;gap:12px;max-height:150px;overflow:hidden;}
-.feed-item{display:flex;gap:9px;font-size:12px;}
-.feed-avatar{width:20px;height:20px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;margin-top:1px;}
-.feed-text b{font-weight:600;}
-.feed-text{color:var(--ink-soft);line-height:1.4;}
-.feed-time{font-size:10px;color:var(--ink-faint);}
-.widget-empty{font-size:12.5px;color:var(--ink-faint);font-style:italic;margin:0;}
 
 .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap;}
 .toolbar select{border:1px solid var(--border);background:var(--surface);border-radius:9px;padding:9px 28px 9px 11px;font-size:12.5px;color:var(--ink);appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B6F92' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;cursor:pointer;}
@@ -206,8 +182,6 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
   .nav-item{justify-content:center;padding:10px;}
   .nav-item .count{position:absolute;top:4px;right:4px;margin:0;padding:0 4px;min-width:14px;text-align:center;}
   .user-chip{justify-content:center;}
-  .widgets-row{grid-template-columns:1fr 1fr;}
-  .widgets-row .widget:last-child{grid-column:span 2;}
 }
 @media (max-width:860px){
   .stats-row{grid-template-columns:repeat(3,1fr);}
@@ -230,8 +204,6 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
   .stat-card .num{font-size:19px;margin-top:7px;}
   .stat-card .lbl{font-size:10px;}
   .stats-row .stat-card:nth-child(4),.stats-row .stat-card:nth-child(5){display:block;}
-  .widgets-row{grid-template-columns:1fr;}
-  .widgets-row .widget:last-child{grid-column:auto;}
   .toolbar{gap:7px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px;margin-left:-14px;margin-right:-14px;padding-left:14px;padding-right:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
   .toolbar::-webkit-scrollbar{display:none;}
   .toolbar select{flex:0 0 auto;width:auto;}
@@ -360,30 +332,6 @@ const BODY_HTML = `
     </div>
 
     <div class="stats-row" id="stats"></div>
-
-    <div class="widgets-row">
-      <div class="widget enter" style="animation-delay:.1s;">
-        <h3>Cumplimiento <span class="tag">a la fecha</span></h3>
-        <div class="donut-wrap">
-          <svg class="donut" viewBox="0 0 84 84">
-            <circle class="bg" cx="42" cy="42" r="35"/>
-            <circle class="fg" id="donutFg" cx="42" cy="42" r="35"/>
-          </svg>
-          <div class="donut-copy">
-            <div class="big" id="donutPct">—%</div>
-            <div class="small">cerrados del total</div>
-          </div>
-        </div>
-      </div>
-      <div class="widget enter" style="animation-delay:.14s;">
-        <h3>Próximos a vencer <span class="tag">7 días</span></h3>
-        <div class="due-list" id="dueList"></div>
-      </div>
-      <div class="widget enter" style="animation-delay:.18s;">
-        <h3>Actividad reciente</h3>
-        <div class="feed" id="feedList"></div>
-      </div>
-    </div>
 
     <div class="toolbar">
       <select id="fResponsable"><option value="">Responsable: todos</option></select>
@@ -611,62 +559,6 @@ export default function Dashboard() {
       if (bellDot) bellDot.style.display = counts.Vencido > 0 ? 'block' : 'none';
     }
 
-    function renderWidgets() {
-      const cerrados = ALL.filter((c) => c.status === 'Cerrado').length;
-      const pct = ALL.length ? Math.round((cerrados / ALL.length) * 100) : 0;
-      const circumference = 2 * Math.PI * 35;
-      const offset = circumference - (pct / 100) * circumference;
-      const fg = document.getElementById('donutFg');
-      fg.style.setProperty('--offset', offset);
-      document.getElementById('donutPct').textContent = pct + '%';
-
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const dueSoon = ALL
-        .filter((c) => c.status !== 'Cerrado')
-        .map((c) => {
-          const d = parseDdmmyyyy(c.promesaCierre);
-          const diff = d ? Math.floor((d - today) / 86400000) : null;
-          return { ...c, diff };
-        })
-        .filter((c) => c.diff !== null && c.diff <= 7)
-        .sort((a, b) => a.diff - b.diff)
-        .slice(0, 4);
-      const dueBox = document.getElementById('dueList');
-      dueBox.innerHTML = dueSoon.length
-        ? dueSoon
-            .map((c) => {
-              const label = c.diff < 0 ? `${Math.abs(c.diff)} d vencido` : c.diff === 0 ? 'Hoy' : `en ${c.diff} d`;
-              const dotClass = c.diff <= 2 ? 'urgent' : 'soon';
-              return `<div class="due-item"><span class="due-dot ${dotClass}"></span><span class="due-text">${escapeHtml(c.compromiso)}</span><span class="due-days">${label}</span></div>`;
-            })
-            .join('')
-        : '<p class="widget-empty">Nada por vencer esta semana.</p>';
-
-      const allAvances = [];
-      ALL.forEach((c) =>
-        (c.historial || []).forEach((h) =>
-          allAvances.push({ ...h, resp: c.responsable, compromiso: c.compromiso, _d: parseDdmmyyyy(h.fecha) })
-        )
-      );
-      allAvances.sort((a, b) => (b._d || 0) - (a._d || 0));
-      const feedBox = document.getElementById('feedList');
-      const top = allAvances.slice(0, 4);
-      feedBox.innerHTML = top.length
-        ? top
-            .map(
-              (a) => `
-        <div class="feed-item">
-          <div class="feed-avatar" style="background:${avatarColor(a.resp)};">${initials(a.resp)}</div>
-          <div>
-            <div class="feed-text"><b>${escapeHtml(a.resp || 'Alguien')}</b> registró un avance en "${escapeHtml((a.compromiso || '').slice(0, 42))}${(a.compromiso || '').length > 42 ? '…' : ''}"</div>
-            <div class="feed-time">${a.fecha}</div>
-          </div>
-        </div>`
-            )
-            .join('')
-        : '<p class="widget-empty">Aún no hay avances registrados.</p>';
-    }
 
     function renderList() {
       const fr = document.getElementById('fResponsable').value;
@@ -737,7 +629,6 @@ export default function Dashboard() {
       fillSelect(document.getElementById('eStatus'), STATUS_ORDER, false);
 
       renderStats();
-      renderWidgets();
       renderList();
 
       const banner = document.getElementById('importBanner');
@@ -996,7 +887,7 @@ export default function Dashboard() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
         <style>{PAGE_STYLES}</style>
