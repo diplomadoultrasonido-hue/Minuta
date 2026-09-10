@@ -61,8 +61,9 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;background:var(--violet);}
 .user-name{font-size:12px;font-weight:600;line-height:1.2;}
 .user-role{font-size:10.5px;color:var(--ink-faint);}
-.logout-link{background:none;border:none;color:var(--ink-faint);font-size:11px;cursor:pointer;padding:6px 7px 0;text-align:left;text-decoration:underline;transition:color .2s ease;}
-.logout-link:hover{color:var(--coral);}
+.logout-btn{width:28px;height:28px;border:none;background:none;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);cursor:pointer;flex-shrink:0;margin-left:auto;transition:background .15s ease, color .15s ease;}
+.logout-btn:hover{background:var(--surface-soft);color:var(--coral);}
+.logout-btn svg{width:15px;height:15px;stroke:currentColor;}
 
 .mobile-topbar{display:none;}
 .bottom-nav{display:none;}
@@ -79,6 +80,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;}
 .icon-btn:hover{background:var(--surface-soft);}
 .icon-btn svg{width:15px;height:15px;stroke:var(--ink-soft);transition:stroke .2s ease;}
+.hidden-role{display:none !important;}
 .theme-ico{position:relative;width:15px;height:15px;}
 .theme-ico svg{position:absolute;inset:0;width:15px;height:15px;transition:opacity .3s ease, transform .3s ease, stroke .2s ease;}
 .theme-ico .theme-icon-moon,.theme-ico #iconMoon{opacity:0;transform:scale(.5) rotate(-90deg);}
@@ -182,11 +184,12 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 
 @media (max-width:1080px){
   .app{grid-template-columns:68px 1fr;}
-  .brand-name,.brand-sub,.nav-item span:not(.count),.user-name,.user-role,.logout-link{display:none;}
+  .brand-name,.brand-sub,.nav-item span:not(.count),.user-name,.user-role{display:none;}
   .brand{justify-content:center;padding:4px 0 20px;}
   .nav-item{justify-content:center;padding:10px;}
   .nav-item .count{position:absolute;top:4px;right:4px;margin:0;padding:0 4px;min-width:14px;text-align:center;}
-  .user-chip{justify-content:center;}
+  .user-chip{flex-direction:column;gap:6px;}
+  .logout-btn{margin-left:0;}
 }
 @media (max-width:860px){
   .stats-row{grid-template-columns:repeat(3,1fr);}
@@ -284,8 +287,10 @@ const BODY_HTML = `
           <div class="user-name" id="userName">Cargando…</div>
           <div class="user-role" id="userRole"></div>
         </div>
+        <button class="logout-btn" id="btnLogout" title="Cerrar sesión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
       </div>
-      <button class="logout-link" id="btnLogout">Cerrar sesión</button>
     </div>
   </aside>
 
@@ -302,6 +307,9 @@ const BODY_HTML = `
         </span>
       </div>
       <div class="avatar" id="userAvatarMobile" style="width:28px;height:28px;font-size:11px;">–</div>
+      <button class="icon-btn" id="btnLogoutMobile" title="Cerrar sesión" style="width:32px;height:32px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
     </div>
   </div>
 
@@ -662,8 +670,8 @@ export default function Dashboard() {
       try {
         const me = await apiGet('/api/me');
         IS_EDITOR = !!me.isEditor;
-        document.getElementById('fabAdd').style.display = IS_EDITOR ? 'flex' : 'none';
-        document.getElementById('btnAdd').style.display = IS_EDITOR ? 'inline-flex' : 'none';
+        document.getElementById('fabAdd').classList.toggle('hidden-role', !IS_EDITOR);
+        document.getElementById('btnAdd').classList.toggle('hidden-role', !IS_EDITOR);
         document.getElementById('readOnlyBanner').classList.toggle('show', !IS_EDITOR);
         const roleLabel = IS_EDITOR ? 'Editor' : 'Solo lectura';
         const initialsLabel = IS_EDITOR ? 'ED' : 'VE';
@@ -863,6 +871,7 @@ export default function Dashboard() {
       window.location.href = '/api/export';
     });
     document.getElementById('btnLogout').addEventListener('click', logout);
+    document.getElementById('btnLogoutMobile').addEventListener('click', logout);
     document.getElementById('btnTheme').addEventListener('click', toggleTheme);
     document.getElementById('btnThemeMobile').addEventListener('click', toggleTheme);
     document.getElementById('btnBell').addEventListener('click', () => {
