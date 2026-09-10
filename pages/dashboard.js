@@ -55,13 +55,13 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .nav-item svg{width:15px;height:15px;flex-shrink:0;}
 .nav-item:hover{background:var(--surface-soft);color:var(--ink);}
 .nav-item.active{background:var(--violet-soft);color:var(--violet-dark);}
-.nav-item .count{margin-left:auto;font-size:10px;background:var(--coral-soft);color:var(--coral);padding:1px 6px;border-radius:20px;font-weight:600;}
+.nav-item .count{margin-left:auto;font-size:10px;background:var(--coral-soft);color:var(--coral);padding:1px 6px;border-radius:20px;font-weight:600;transition:background .2s ease, color .2s ease;}
 .sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);}
 .user-chip{display:flex;align-items:center;gap:9px;padding:7px;border-radius:9px;}
 .avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;background:var(--violet);}
 .user-name{font-size:12px;font-weight:600;line-height:1.2;}
 .user-role{font-size:10.5px;color:var(--ink-faint);}
-.logout-link{background:none;border:none;color:var(--ink-faint);font-size:11px;cursor:pointer;padding:6px 7px 0;text-align:left;text-decoration:underline;}
+.logout-link{background:none;border:none;color:var(--ink-faint);font-size:11px;cursor:pointer;padding:6px 7px 0;text-align:left;text-decoration:underline;transition:color .2s ease;}
 .logout-link:hover{color:var(--coral);}
 
 .mobile-topbar{display:none;}
@@ -75,10 +75,15 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .search-pill{position:relative;}
 .search-pill input{width:200px;padding:9px 12px 9px 32px;border-radius:9px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--ink);transition:box-shadow .15s ease, border-color .2s ease, background .2s ease, color .2s ease, width .2s ease;}
 .search-pill input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft);width:240px;}
-.search-pill svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--ink-faint);}
+.search-pill svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--ink-faint);transition:stroke .2s ease;}
 .icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;}
 .icon-btn:hover{background:var(--surface-soft);}
-.icon-btn svg{width:15px;height:15px;stroke:var(--ink-soft);}
+.icon-btn svg{width:15px;height:15px;stroke:var(--ink-soft);transition:stroke .2s ease;}
+.theme-ico{position:relative;width:15px;height:15px;}
+.theme-ico svg{position:absolute;inset:0;width:15px;height:15px;transition:opacity .3s ease, transform .3s ease, stroke .2s ease;}
+.theme-ico .theme-icon-moon,.theme-ico #iconMoon{opacity:0;transform:scale(.5) rotate(-90deg);}
+[data-theme="dark"] .theme-ico .theme-icon-sun,[data-theme="dark"] .theme-ico #iconSun{opacity:0;transform:scale(.5) rotate(90deg);}
+[data-theme="dark"] .theme-ico .theme-icon-moon,[data-theme="dark"] .theme-ico #iconMoon{opacity:1;transform:scale(1) rotate(0deg);}
 .icon-btn .dot{position:absolute;top:6px;right:6px;width:6px;height:6px;border-radius:50%;background:var(--coral);}
 .btn{border:none;border-radius:9px;font-size:13px;font-weight:600;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:transform .12s ease, box-shadow .15s ease, background .2s ease, color .2s ease, border-color .2s ease, opacity .15s ease;}
 .btn:active{transform:scale(.97);}
@@ -92,15 +97,15 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .enter{opacity:0;transform:translateY(10px);animation:enterUp .5s cubic-bezier(.2,.7,.3,1) forwards;}
 @keyframes enterUp{to{opacity:1;transform:translateY(0);}}
 
-.info-banner{background:var(--violet-soft);color:var(--violet-dark);font-size:12.5px;font-weight:500;padding:10px 16px;border-radius:10px;margin-bottom:18px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+.info-banner{background:var(--violet-soft);color:var(--violet-dark);font-size:12.5px;font-weight:500;padding:10px 16px;border-radius:10px;margin-bottom:18px;display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;transition:background .2s ease, color .2s ease;}
 .info-banner.show{display:flex;}
 
 .stats-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px;}
 .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 14px 12px;cursor:pointer;transition:background .2s ease, color .2s ease, border-color .2s ease, transform .15s ease, box-shadow .15s ease;}
 .stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-card);}
 .stat-card.active{border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft);}
-.stat-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.stat-icon svg{width:14px;height:14px;}
+.stat-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s ease;}
+.stat-icon svg{width:14px;height:14px;transition:stroke .2s ease;}
 .stat-card.nuevo .stat-icon{background:var(--slate-soft);} .stat-card.nuevo .stat-icon svg{stroke:var(--slate);}
 .stat-card.abierto .stat-icon{background:var(--violet-soft);} .stat-card.abierto .stat-icon svg{stroke:var(--violet);}
 .stat-card.acuerdo .stat-icon{background:var(--amber-soft);} .stat-card.acuerdo .stat-icon svg{stroke:var(--amber);}
@@ -133,7 +138,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .overdue-chip{color:var(--coral);font-weight:600;}
 .card-side{display:flex;flex-direction:column;align-items:flex-end;justify-content:space-between;gap:8px;min-width:96px;}
 .card-side .area-tag{font-size:10.5px;color:var(--ink-faint);text-align:right;}
-.avance-pill{font-size:10.5px;color:var(--teal);background:var(--teal-soft);padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap;}
+.avance-pill{font-size:10.5px;color:var(--teal);background:var(--teal-soft);padding:3px 8px;border-radius:20px;font-weight:600;white-space:nowrap;transition:background .2s ease, color .2s ease;}
 .empty{text-align:center;padding:60px 20px;color:var(--ink-soft);font-size:13.5px;}
 .empty svg{width:36px;height:36px;stroke:var(--ink-faint);margin-bottom:10px;}
 
@@ -291,8 +296,10 @@ const BODY_HTML = `
     </div>
     <div style="display:flex;align-items:center;gap:8px;">
       <div class="icon-btn" id="btnThemeMobile" style="width:32px;height:32px;">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-moon" style="display:none;"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+        <span class="theme-ico">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-moon"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+        </span>
       </div>
       <div class="avatar" id="userAvatarMobile" style="width:28px;height:28px;font-size:11px;">–</div>
     </div>
@@ -322,8 +329,10 @@ const BODY_HTML = `
           <span class="dot" id="bellDot" style="display:none;"></span>
         </div>
         <div class="icon-btn" id="btnTheme" title="Cambiar tema">
-          <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-          <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+          <span class="theme-ico">
+            <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+            <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+          </span>
         </div>
         <button class="btn btn-ghost" id="btnExportar">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5M12 15V3"/></svg>
@@ -820,11 +829,6 @@ export default function Dashboard() {
     }
     function applyTheme(theme) {
       document.documentElement.setAttribute('data-theme', theme);
-      const isDark = theme === 'dark';
-      document.getElementById('iconSun').style.display = isDark ? 'none' : 'block';
-      document.getElementById('iconMoon').style.display = isDark ? 'block' : 'none';
-      document.querySelectorAll('.theme-icon-sun').forEach((el) => (el.style.display = isDark ? 'none' : 'block'));
-      document.querySelectorAll('.theme-icon-moon').forEach((el) => (el.style.display = isDark ? 'block' : 'none'));
     }
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
