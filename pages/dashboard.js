@@ -188,6 +188,22 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
   .cal-agenda{display:none;}
 }
 
+.reports-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;transition:background .2s ease, border-color .2s ease;}
+.report-card h3{font-size:14px;margin:0 0 16px;font-weight:600;}
+.report-row{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+.report-row:last-child{margin-bottom:0;}
+.report-label{width:130px;flex-shrink:0;font-size:12.5px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.report-bar-track{flex:1;height:10px;background:var(--surface-soft);border-radius:6px;overflow:hidden;transition:background .2s ease;}
+.report-bar-fill{height:100%;border-radius:6px;width:0;transition:width .7s cubic-bezier(.2,.7,.2,1);}
+.report-value{width:92px;flex-shrink:0;text-align:right;font-size:11.5px;color:var(--ink-soft);font-weight:600;}
+.report-empty{font-size:12.5px;color:var(--ink-faint);font-style:italic;margin:0;}
+@media (max-width:860px){
+  .reports-grid{grid-template-columns:1fr;}
+  .report-label{width:100px;}
+  .report-value{width:76px;font-size:11px;}
+}
+
 
 .fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(35,97,107,.5);cursor:pointer;z-index:20;transition:transform .15s ease;}
 .fab:active{transform:scale(.92);}
@@ -276,7 +292,6 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 const LOGO_SVG = '<svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 5.25C4 3.45508 5.45507 2 7.25 2H20.75C22.5449 2 24 3.45507 24 5.25V17.3787C23.8796 17.4592 23.7653 17.5527 23.659 17.659L22.5 18.818V5.25C22.5 4.2835 21.7165 3.5 20.75 3.5H7.25C6.2835 3.5 5.5 4.2835 5.5 5.25V22.7497C5.5 23.7162 6.2835 24.4997 7.25 24.4997H15.3177L16.8177 25.9997H7.25C5.45507 25.9997 4 24.5446 4 22.7497V5.25Z" fill="currentColor"></path><path d="M10.5 8.75C10.5 9.44036 9.94036 10 9.25 10C8.55964 10 8 9.44036 8 8.75C8 8.05964 8.55964 7.5 9.25 7.5C9.94036 7.5 10.5 8.05964 10.5 8.75Z" fill="currentColor"></path><path d="M9.25 15.2498C9.94036 15.2498 10.5 14.6902 10.5 13.9998C10.5 13.3095 9.94036 12.7498 9.25 12.7498C8.55964 12.7498 8 13.3095 8 13.9998C8 14.6902 8.55964 15.2498 9.25 15.2498Z" fill="currentColor"></path><path d="M9.25 20.5C9.94036 20.5 10.5 19.9404 10.5 19.25C10.5 18.5596 9.94036 18 9.25 18C8.55964 18 8 18.5596 8 19.25C8 19.9404 8.55964 20.5 9.25 20.5Z" fill="currentColor"></path><path d="M12.75 8C12.3358 8 12 8.33579 12 8.75C12 9.16421 12.3358 9.5 12.75 9.5H19.25C19.6642 9.5 20 9.16421 20 8.75C20 8.33579 19.6642 8 19.25 8H12.75Z" fill="currentColor"></path><path d="M12 13.9998C12 13.5856 12.3358 13.2498 12.75 13.2498H19.25C19.6642 13.2498 20 13.5856 20 13.9998C20 14.414 19.6642 14.7498 19.25 14.7498H12.75C12.3358 14.7498 12 14.414 12 13.9998Z" fill="currentColor"></path><path d="M12.75 18.5C12.3358 18.5 12 18.8358 12 19.25C12 19.6642 12.3358 20 12.75 20H19.25C19.6642 20 20 19.6642 20 19.25C20 18.8358 19.6642 18.5 19.25 18.5H12.75Z" fill="currentColor"></path><path d="M25.7803 19.7803L19.7803 25.7803C19.6397 25.921 19.4489 26 19.25 26C19.0511 26 18.8603 25.921 18.7197 25.7803L15.7216 22.7823C15.4287 22.4894 15.4287 22.0145 15.7216 21.7216C16.0145 21.4287 16.4894 21.4287 16.7823 21.7216L19.25 24.1893L24.7197 18.7197C25.0126 18.4268 25.4874 18.4268 25.7803 18.7197C26.0732 19.0126 26.0732 19.4874 25.7803 19.7803Z" fill="currentColor"></path></svg>';
 
 const NAV_ICONS = {
-  resumen: '<rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/>',
   compromisos: '<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>',
   calendario: '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
   reportes: '<path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/>',
@@ -297,7 +312,6 @@ const AVATAR_COLORS = {
 };
 
 const NAV_ITEMS = [
-  { key: 'resumen', label: 'Resumen' },
   { key: 'compromisos', label: 'Compromisos', withCount: true },
   { key: 'calendario', label: 'Calendario' },
   { key: 'reportes', label: 'Reportes' },
@@ -426,6 +440,19 @@ const BODY_HTML = `
         </div>
       </div>
       <div id="calBody"></div>
+    </div>
+
+    <div id="reportsView" style="display:none;">
+      <div class="reports-grid">
+        <div class="report-card">
+          <h3>Compromisos por área</h3>
+          <div id="reportArea"></div>
+        </div>
+        <div class="report-card">
+          <h3>Cumplimiento por responsable</h3>
+          <div id="reportResp"></div>
+        </div>
+      </div>
     </div>
   </main>
 </div>
@@ -751,7 +778,64 @@ export default function Dashboard() {
       currentView = view;
       document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
       document.getElementById('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
+      document.getElementById('reportsView').style.display = view === 'reports' ? 'block' : 'none';
       if (view === 'calendar') renderCalendar();
+      if (view === 'reports') renderReports();
+    }
+
+    function renderReports() {
+      renderReportArea();
+      renderReportResp();
+    }
+
+    function renderReportArea() {
+      const counts = {};
+      ALL.forEach((c) => {
+        const a = c.area || 'Sin área';
+        counts[a] = (counts[a] || 0) + 1;
+      });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const max = entries.length ? entries[0][1] : 1;
+      const box = document.getElementById('reportArea');
+      box.innerHTML = entries.length
+        ? entries
+            .map(
+              ([area, count]) => `
+        <div class="report-row">
+          <div class="report-label">${escapeHtml(area)}</div>
+          <div class="report-bar-track"><div class="report-bar-fill" style="width:${Math.round((count / max) * 100)}%;background:var(--violet);"></div></div>
+          <div class="report-value">${count} compromiso${count > 1 ? 's' : ''}</div>
+        </div>
+      `
+            )
+            .join('')
+        : '<p class="report-empty">Aún no hay compromisos.</p>';
+    }
+
+    function renderReportResp() {
+      const byResp = {};
+      ALL.forEach((c) => {
+        const r = c.responsable || 'Sin asignar';
+        if (!byResp[r]) byResp[r] = { total: 0, cerrados: 0 };
+        byResp[r].total++;
+        if (c.status === 'Cerrado') byResp[r].cerrados++;
+      });
+      const entries = Object.entries(byResp).sort((a, b) => b[1].cerrados / b[1].total - a[1].cerrados / a[1].total);
+      const box = document.getElementById('reportResp');
+      box.innerHTML = entries.length
+        ? entries
+            .map(([name, d]) => {
+              const pct = d.total ? Math.round((d.cerrados / d.total) * 100) : 0;
+              return `
+          <div class="report-row">
+            <div class="report-label">${escapeHtml(name)}</div>
+            <div class="report-bar-track"><div class="report-bar-fill" style="width:${pct}%;background:${avatarColor(name)};"></div></div>
+            <div class="report-value">${pct}% (${d.cerrados}/${d.total})</div>
+          </div>
+        `;
+            })
+            .join('')
+        : '<p class="report-empty">Aún no hay compromisos.</p>';
     }
 
     function renderCalendar() {
@@ -904,6 +988,7 @@ export default function Dashboard() {
         if (c) renderTimeline(c.historial || []);
       }
       if (currentView === 'calendar') renderCalendar();
+      if (currentView === 'reports') renderReports();
     }
 
     function onErrorMsg(err) {
@@ -1136,7 +1221,9 @@ export default function Dashboard() {
         const nav = el.dataset.nav;
         if (nav === 'calendario') {
           showView('calendar');
-        } else if (nav === 'resumen' || nav === 'compromisos') {
+        } else if (nav === 'reportes') {
+          showView('reports');
+        } else if (nav === 'compromisos') {
           showView('list');
         } else {
           toast('Próximamente');
