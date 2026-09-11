@@ -1,92 +1,64 @@
-# Minuta Ultrasonido — con cuentas por persona y equipos separados
+# Minuta Ultrasonido — cuentas, equipos, y compromisos asignados por persona
 
-Cada persona entra con su propio usuario y contraseña. Puede haber varios
-**equipos** completamente aislados entre sí (por ejemplo, tu equipo y el de
-otra jefa) — nadie ve ni edita los compromisos de un equipo que no es el
-suyo, ni siquiera el operador de la app.
+Cada persona entra con su propio usuario y contraseña. Los compromisos ya no
+pertenecen a "un equipo" completo — se **asignan a personas específicas**
+(una o varias). Cada quien ve exactamente:
 
-## Qué necesitas
+- Lo que **le asignaron a ella/él**.
+- Lo que **ella/él le asignó a otras personas**.
 
-1. Una cuenta de **GitHub** y una de **Vercel** (ya las tienes).
-2. Una base de datos **Redis** conectada al proyecto (ya la tienes).
+Esto arma la jerarquía sola: si alguien de tu equipo tiene su propio grupo y
+le asigna algo a su gente, tú no lo ves (no es asunto tuyo) — pero esa
+persona sí ve ambos lados. Y si alguien pertenece a varios grupos, ve todo lo
+que le hayan asignado desde cualquiera de ellos.
 
-## Paso 1 — Variables de entorno nuevas
+## Variables de entorno
 
-En Vercel → Settings → Environment Variables, agrega (además de las que ya
-tenías: `KV_REDIS_URL`, `SESSION_SECRET`):
+En Vercel → Settings → Environment Variables:
 
-| Nombre | Valor |
+| Nombre | Para qué |
 |---|---|
-| `SETUP_SECRET` | Una clave larga y secreta que **solo tú** vas a usar para crear cuentas |
+| `KV_REDIS_URL` | Conexión a tu base de datos (ya la tenías) |
+| `SESSION_SECRET` | Firma las cookies de sesión (ya la tenías) |
+| `SETUP_SECRET` | Clave para entrar a `/setup` — solo tú la conoces |
+| `LEGACY_ADMIN_USERNAME` | (Opcional) el usuario al que se le habilita el botón "Importar compromisos iniciales" |
 
-Puedes **borrar** `VIEW_PASSWORD` y `EDIT_PASSWORD` — ya no se usan.
+## Primeros pasos
 
-Marca todas las variables para **Production, Preview y Development**, y
-vuelve a desplegar (Redeploy) para que tomen efecto.
+1. Sube este código a tu repo, como siempre.
+2. Entra a `tu-app.vercel.app/setup` con tu `SETUP_SECRET`.
+3. **"1. Crear un equipo nuevo"** — crea tu propia cuenta (ej. usuario
+   `miguel`) y la de la otra jefa. Dale a cada una el nombre de equipo que
+   quieras (es solo una etiqueta). Dejando marcada la casilla, ambas podrán
+   crear y administrar su propio equipo desde dentro de la app.
+4. **"2. Agregar una persona"** — agrega a cada subordinado(a) al equipo que
+   corresponda.
+5. **"4. Migrar los compromisos antiguos"** — escribe tu usuario (ej.
+   `miguel`) para que los compromisos que ya tenías queden asignados a ti.
+   Después, desde la app, edítalos para repartirlos a quien corresponda.
 
-## Paso 2 — Sube este código
+## Cómo se usa día a día
 
-Reemplaza el contenido de tu repositorio de GitHub con los archivos de este
-proyecto, como has hecho antes.
+- **Agregar un compromiso**: eliges "Asignado a" con casillas — puedes
+  marcar una o varias personas de tu equipo. Todas las que marques podrán
+  verlo y darle seguimiento.
+- **Mi equipo** (dentro de "Configuración", solo visible si tienes el
+  permiso): ahí creas tu equipo si no lo tienes, agregas gente nueva, o
+  agregas a alguien que ya tiene cuenta en otro equipo (para que también
+  pueda recibir compromisos tuyos).
+- **Dar el permiso de crear equipo a alguien más tarde**: en `/setup`,
+  sección **"5. Dar o quitar el permiso de crear equipo"** — así, si una de
+  tus subordinadas necesita armar su propio grupo, tú se lo habilitas ahí una
+  vez, y de ahí en adelante ella lo maneja sola desde "Configuración".
+- **Perfil**: cada quien cambia su nombre, foto y contraseña desde
+  "Configuración".
+- **Exportar**: cada quien descarga en Excel solo lo que puede ver.
 
-## Paso 3 — Crea tu equipo desde /setup
+## `/setup` sigue disponible como respaldo
 
-1. Entra a `https://tu-app.vercel.app/setup`
-2. Escribe tu `SETUP_SECRET`.
-3. En **"1. Crear un equipo nuevo"**, crea tu propio equipo (ej. nombre
-   "Equipo de Miguel", tu usuario y contraseña). Anota el **id del equipo**
-   que te muestra el mensaje de confirmación (ej. `equipo-de-miguel`).
-4. Repite lo mismo para la otra jefa: un equipo nuevo con su propio usuario y
-   contraseña de administradora.
-5. Con **"2. Agregar una persona a un equipo existente"**, agrega ahí a cada
-   subordinado(a), eligiendo a qué equipo pertenece.
-
-## Paso 4 — Recupera tus compromisos actuales
-
-Como ya tenías compromisos cargados desde antes (los que ves en tu app hoy),
-usa la opción **"4. Migrar los compromisos antiguos a un equipo"** en
-`/setup`, seleccionando **tu propio equipo** como destino. Esto copia
-exactamente lo que tienes guardado ahorita mismo (no una copia vieja) hacia
-tu equipo nuevo.
-
-Solo hazlo una vez, y solo para tu equipo — el de la otra jefa empieza vacío,
-ya que nunca ha tenido datos.
-
-## Paso 5 (opcional) — Habilitar el botón "Importar compromisos iniciales"
-
-Si en vez del Paso 4 prefieres usar el botón dentro de la app (que carga una
-foto fija de tus 45 compromisos originales tomada en un momento anterior, no
-tus datos más recientes), agrega la variable `LEGACY_TEAM_ID` en Vercel con
-el id de tu equipo, y vuelve a desplegar. **No recomendado si ya usaste el
-Paso 4** — haría lo mismo pero con datos potencialmente desactualizados.
-
-## Cómo entra cada quien
-
-- Cada persona va a la URL normal de la app y entra con **su usuario y
-  contraseña** (no más contraseñas compartidas).
-- Ve únicamente los compromisos de su propio equipo — en la lista, el
-  calendario, los reportes y las exportaciones.
-- Cualquiera (administrador o miembro) puede agregar y editar compromisos de
-  su equipo.
-- Desde **"Configuración"**, cada quien cambia su nombre, foto de perfil y
-  contraseña.
-- El responsable de cada compromiso ahora se elige entre los miembros reales
-  de ese equipo (ya no es una lista fija de nombres).
-
-## Agregar personas o restablecer contraseñas después
-
-Vuelve a `/setup` cuando lo necesites:
-
-- **"2. Agregar una persona"** para dar de alta a alguien nuevo en un equipo.
-- **"3. Restablecer una contraseña"** si alguien la olvidó.
-
-Nadie más ve esta página — no aparece en ningún menú, y sin la clave
-`SETUP_SECRET` no deja hacer nada.
-
-## Exportar a Excel
-
-Sigue funcionando igual, con el botón "Exportar" — pero ahora cada quien
-descarga solo los compromisos de su propio equipo.
+No aparece en ningún menú — solo tú la usas, para restablecer una contraseña
+de emergencia, revisar todos los equipos existentes, o dar/quitar el permiso
+de crear equipo.
 
 ## Desarrollo local (opcional)
 
@@ -98,10 +70,15 @@ npm run dev
 
 ## Notas técnicas
 
-- Las contraseñas se guardan con hash seguro (bcrypt), nunca en texto plano.
-- Los datos de cada equipo viven bajo claves separadas en Redis
-  (`team:{id}:compromisos`, `team:{id}:next_id`), así que un error de
-  filtrado no puede mezclar accidentalmente los datos de dos equipos.
-- El catálogo de "áreas" y "estados" sigue siendo el mismo para todos los
-  equipos — puedes editarlo en `lib/store.js` (constante `CATALOGO_BASE`) si
-  hace falta.
+- Las contraseñas se guardan con hash seguro (bcrypt).
+- Cada compromiso guarda quién lo creó (`assignedBy`) y a quién se asignó
+  (`assignedTo`, un arreglo). La visibilidad se calcula con esos dos campos
+  en cada consulta — no hay una tabla separada por equipo que se pueda
+  desincronizar.
+- Una persona puede pertenecer a varios equipos (grupos) a la vez, cada uno
+  con su propio rol (administrador o miembro) — eso vive en
+  `user:{username}:groups` en Redis.
+- El campo "Responsable" que ves en las tarjetas y en el Excel exportado es
+  un texto generado automáticamente a partir de los nombres de
+  "Asignado a" — no lo edites directamente en el Excel, solo sirve para
+  mostrar/filtrar.

@@ -17,7 +17,7 @@ export default async function handler(req, res) {
     return;
   }
   try {
-    const result = await addAvance(session.teamId, id, avance);
+    const result = await addAvance(session.username, id, avance);
     res.status(200).json(result);
   } catch (e) {
     console.error(e);

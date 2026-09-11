@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { compromisos } = await getData(session.teamId);
+    const { compromisos } = await getData(session.username);
     const ordenados = compromisos.slice().sort((a, b) => a.id - b.id);
 
     const filasPrincipales = ordenados.map((c) => ({

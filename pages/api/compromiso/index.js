@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     return;
   }
   try {
-    const result = await addCompromiso(session.teamId, req.body || {});
+    const result = await addCompromiso(session.username, req.body || {});
     res.status(200).json(result);
   } catch (e) {
     console.error(e);

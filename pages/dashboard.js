@@ -482,7 +482,8 @@ const BODY_HTML = `
     </div>
 
     <div id="profileView" style="display:none;">
-      <div class="report-card" style="max-width:440px;">
+      <div class="report-card">
+        <div style="max-width:440px;">
         <h3>Mi perfil</h3>
         <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
           <div class="avatar" id="profileAvatarPreview" style="width:56px;height:56px;font-size:18px;cursor:pointer;" title="Cambiar foto">–</div>
@@ -518,6 +519,55 @@ const BODY_HTML = `
           </div>
         </div>
         <p id="profileRoleNote" style="font-size:11.5px;color:var(--ink-faint);margin:16px 0 0;"></p>
+        </div>
+      </div>
+
+      <div class="report-card" id="teamCard" style="display:none;margin-top:16px;">
+        <h3>Mi equipo</h3>
+        <div id="teamNoGroup" style="display:none;">
+          <p style="font-size:12.5px;color:var(--ink-soft);margin:0 0 12px;">Aún no tienes un equipo propio.</p>
+          <div class="row2" style="max-width:440px;">
+            <div class="field" style="grid-column:1/-1;">
+              <label>Nombre de tu equipo</label>
+              <input type="text" id="newGroupName" placeholder="Ej. Equipo de Laura">
+            </div>
+          </div>
+          <div class="modal-actions" style="justify-content:flex-start;">
+            <button class="btn btn-primary" id="btnCreateGroup">Crear mi equipo</button>
+          </div>
+        </div>
+        <div id="teamHasGroup" style="display:none;">
+          <div id="teamMembersList" style="margin-bottom:16px;"></div>
+          <div class="divider">
+            <h3>Agregar persona a mi equipo</h3>
+            <div class="row2" style="max-width:520px;">
+              <div class="field">
+                <label>Nombre</label>
+                <input type="text" id="newMemberName">
+              </div>
+              <div class="field">
+                <label>Usuario</label>
+                <input type="text" id="newMemberUsername">
+              </div>
+            </div>
+            <div class="row2" style="max-width:520px;">
+              <div class="field">
+                <label>Contraseña (si es cuenta nueva)</label>
+                <input type="text" id="newMemberPassword">
+              </div>
+              <div class="field">
+                <label>Rol en tu equipo</label>
+                <select id="newMemberRole">
+                  <option value="member">Miembro</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-actions" style="justify-content:flex-start;">
+              <button class="btn btn-primary" id="btnAddTeamMember">Agregar a mi equipo</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -540,15 +590,13 @@ const BODY_HTML = `
         <label>Compromiso / actividad</label>
         <textarea id="nCompromiso" placeholder="Describe el compromiso acordado en la reunión"></textarea>
       </div>
-      <div class="row2">
-        <div class="field">
-          <label>Área</label>
-          <select id="nArea"></select>
-        </div>
-        <div class="field">
-          <label>Responsable</label>
-          <select id="nResponsable"></select>
-        </div>
+      <div class="field">
+        <label>Área</label>
+        <select id="nArea"></select>
+      </div>
+      <div class="field">
+        <label>Asignado a (elige una o varias personas)</label>
+        <div id="nAsignados" style="display:flex;flex-direction:column;gap:6px;max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px 10px;"></div>
       </div>
       <div class="row2">
         <div class="field">
@@ -669,6 +717,22 @@ export default function Dashboard() {
         o.textContent = v;
         sel.appendChild(o);
       });
+    }
+    function fillAsignadosCheckboxes(asignables) {
+      const box = document.getElementById('nAsignados');
+      if (!asignables.length) {
+        box.innerHTML = '<span style="font-size:12.5px;color:var(--ink-faint);">No tienes a nadie en tu equipo todavía.</span>';
+        return;
+      }
+      box.innerHTML = asignables
+        .map(
+          (a) => `
+        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
+          <input type="checkbox" class="asignado-check" value="${a.username}"> ${escapeHtml(a.name)}
+        </label>
+      `
+        )
+        .join('');
     }
     function toast(msg) {
       const t = document.getElementById('toast');
@@ -834,7 +898,7 @@ export default function Dashboard() {
       const fb = document.getElementById('fBuscar').value.trim().toLowerCase();
 
       let filtered = ALL.filter((c) => {
-        if (fr && c.responsable !== fr) return false;
+        if (fr && !(c.responsable || '').split(', ').includes(fr)) return false;
         if (fa && c.area !== fa) return false;
         if (fs && c.status !== fs) return false;
         if (fb) {
@@ -864,13 +928,16 @@ export default function Dashboard() {
         div.style.animationDelay = Math.min(i * 0.03, 0.3) + 's';
         const nAvances = (c.historial || []).length;
         const overdue = c.diasVencido ? `<span class="chip overdue-chip">${c.diasVencido} día(s) vencido</span>` : '';
+        const respNames = (c.responsable || '').split(', ').filter(Boolean);
+        const firstResp = respNames[0] || '—';
+        const respLabel = respNames.length > 1 ? `${escapeHtml(firstResp)} +${respNames.length - 1}` : escapeHtml(firstResp);
         div.innerHTML = `
           <div class="card-bar ${slug(c.status)}"></div>
           <div class="card-main">
             <p class="compromiso">${escapeHtml(c.compromiso)}</p>
             <div class="card-meta">
               <span class="badge ${slug(c.status)}">${c.status}</span>
-              <span class="chip"><span class="resp-avatar" style="background:${avatarColor(c.responsable)};">${initials(c.responsable)}</span>${escapeHtml(c.responsable || '—')}</span>
+              <span class="chip"><span class="resp-avatar" style="background:${avatarColor(firstResp)};">${initials(firstResp)}</span>${respLabel}</span>
               <span class="chip">Cierre: ${c.promesaCierre || 'sin fecha'}</span>
               ${overdue}
               ${nAvances ? `<span class="avance-pill">${nAvances} avance${nAvances > 1 ? 's' : ''}</span>` : ''}
@@ -956,10 +1023,12 @@ export default function Dashboard() {
     function renderReportResp() {
       const byResp = {};
       ALL.forEach((c) => {
-        const r = c.responsable || 'Sin asignar';
-        if (!byResp[r]) byResp[r] = { total: 0, cerrados: 0 };
-        byResp[r].total++;
-        if (c.status === 'Cerrado') byResp[r].cerrados++;
+        const names = (c.responsable || 'Sin asignar').split(', ').filter(Boolean);
+        names.forEach((r) => {
+          if (!byResp[r]) byResp[r] = { total: 0, cerrados: 0 };
+          byResp[r].total++;
+          if (c.status === 'Cerrado') byResp[r].cerrados++;
+        });
       });
       const entries = Object.entries(byResp).sort((a, b) => b[1].cerrados / b[1].total - a[1].cerrados / a[1].total);
       const box = document.getElementById('reportResp');
@@ -1115,7 +1184,7 @@ export default function Dashboard() {
       fillSelect(document.getElementById('fArea'), CATALOGO.areas, true, 'Área: todas');
       fillSelect(document.getElementById('fStatus'), STATUS_ORDER, true, 'Estado: todos');
       fillSelect(document.getElementById('nArea'), CATALOGO.areas, false);
-      fillSelect(document.getElementById('nResponsable'), CATALOGO.responsables, false);
+      fillAsignadosCheckboxes(CATALOGO.asignables || []);
       fillSelect(document.getElementById('eStatus'), STATUS_ORDER, false);
 
       renderStats();
@@ -1187,8 +1256,101 @@ export default function Dashboard() {
       document.getElementById('profileNewPass').value = '';
       applyAvatar(document.getElementById('profileAvatarPreview'), ME.name, ME.photo);
       document.getElementById('profileRoleNote').textContent =
-        (ME.isAdmin ? 'Eres administrador(a) de tu equipo.' : 'Eres miembro de tu equipo.') +
-        ' Para agregar o quitar personas de tu equipo, pide al operador de la app que lo haga.';
+        (ME.isAdmin ? 'Administras al menos un equipo.' : 'No administras ningún equipo todavía.') +
+        (ME.canCreateGroups ? '' : ' Si necesitas crear tu propio equipo, pide al operador de la app que te dé permiso.');
+      loadMyTeam();
+    }
+
+    let myTeamGroups = [];
+
+    async function loadMyTeam() {
+      const card = document.getElementById('teamCard');
+      if (!ME || !ME.canCreateGroups) {
+        card.style.display = 'none';
+        return;
+      }
+      card.style.display = 'block';
+      try {
+        const data = await apiGet('/api/team/members');
+        myTeamGroups = data.groups || [];
+        const noGroup = document.getElementById('teamNoGroup');
+        const hasGroup = document.getElementById('teamHasGroup');
+        if (myTeamGroups.length === 0) {
+          noGroup.style.display = 'block';
+          hasGroup.style.display = 'none';
+        } else {
+          noGroup.style.display = 'none';
+          hasGroup.style.display = 'block';
+          renderTeamMembers();
+        }
+      } catch (e) {
+        toast(e.message || 'No se pudo cargar tu equipo');
+      }
+    }
+
+    function renderTeamMembers() {
+      const box = document.getElementById('teamMembersList');
+      box.innerHTML = myTeamGroups
+        .map(
+          (g) => `
+        <div style="margin-bottom:14px;">
+          <div style="font-size:13px;font-weight:600;margin-bottom:6px;">${escapeHtml(g.name)}</div>
+          ${g.members
+            .map(
+              (m) => `
+            <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);padding:3px 0;">
+              <span class="avatar" style="width:22px;height:22px;font-size:9.5px;">${initials(m.name)}</span>
+              ${escapeHtml(m.name)} <code style="font-size:11px;color:var(--ink-faint);">(${m.username})</code>
+              <span class="badge ${m.role === 'admin' ? 'abierto' : 'nuevo'}" style="margin-left:auto;">${m.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
+            </div>
+          `
+            )
+            .join('')}
+        </div>
+      `
+        )
+        .join('');
+    }
+
+    async function createMyGroup() {
+      const groupName = document.getElementById('newGroupName').value.trim();
+      if (!groupName) {
+        toast('Escribe el nombre de tu equipo');
+        return;
+      }
+      try {
+        await apiSend('/api/team/create', 'POST', { groupName });
+        toast('Equipo creado');
+        document.getElementById('newGroupName').value = '';
+        await loadMyTeam();
+        loadAll();
+      } catch (e) {
+        toast(e.message || 'No se pudo crear el equipo');
+      }
+    }
+
+    async function addMyTeamMember() {
+      if (myTeamGroups.length === 0) return;
+      const groupId = myTeamGroups[0].groupId;
+      const name = document.getElementById('newMemberName').value.trim();
+      const username = document.getElementById('newMemberUsername').value.trim();
+      const password = document.getElementById('newMemberPassword').value;
+      const role = document.getElementById('newMemberRole').value;
+      if (!name || !username) {
+        toast('Falta el nombre o el usuario');
+        return;
+      }
+      try {
+        await apiSend('/api/team/add-member', 'POST', { groupId, name, username, password, role });
+        toast('Persona agregada a tu equipo');
+        document.getElementById('newMemberName').value = '';
+        document.getElementById('newMemberUsername').value = '';
+        document.getElementById('newMemberPassword').value = '';
+        await loadMyTeam();
+        loadAll();
+      } catch (e) {
+        toast(e.message || 'No se pudo agregar a la persona');
+      }
     }
 
     function resizeImageFile(file, maxSize, callback) {
@@ -1279,6 +1441,9 @@ export default function Dashboard() {
       document.getElementById('nSolicitadoPor').value = '';
       document.getElementById('nPromesa').value = presetIsoDate || '';
       document.getElementById('nComentarios').value = '';
+      document.querySelectorAll('.asignado-check').forEach((c) => {
+        c.checked = ME ? c.value === ME.username : false;
+      });
       document.getElementById('overlayAdd').classList.add('show');
     }
     function closeAdd() {
@@ -1290,12 +1455,17 @@ export default function Dashboard() {
         toast('Escribe el compromiso');
         return;
       }
+      const assignedTo = Array.from(document.querySelectorAll('.asignado-check:checked')).map((c) => c.value);
+      if (assignedTo.length === 0) {
+        toast('Elige al menos una persona en "Asignado a"');
+        return;
+      }
       const payload = {
         fecha: isoToDdmmyyyy(isoToday()),
         area: document.getElementById('nArea').value,
         tema: '',
         compromiso,
-        responsable: document.getElementById('nResponsable').value,
+        assignedTo,
         solicitadoPor: document.getElementById('nSolicitadoPor').value,
         promesaCierre: isoToDdmmyyyy(document.getElementById('nPromesa').value),
         status: 'Nuevo',
@@ -1452,6 +1622,8 @@ export default function Dashboard() {
     });
     document.getElementById('btnSaveProfile').addEventListener('click', saveProfile);
     document.getElementById('btnSavePassword').addEventListener('click', savePassword);
+    document.getElementById('btnCreateGroup').addEventListener('click', createMyGroup);
+    document.getElementById('btnAddTeamMember').addEventListener('click', addMyTeamMember);
     document.getElementById('btnExportar').addEventListener('click', () => {
       window.location.href = '/api/export';
     });

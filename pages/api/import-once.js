@@ -12,12 +12,12 @@ export default async function handler(req, res) {
     res.status(401).json({ error: 'No autenticado' });
     return;
   }
-  if (!process.env.LEGACY_TEAM_ID || session.teamId !== process.env.LEGACY_TEAM_ID) {
-    res.status(403).json({ error: 'Esta importación solo aplica al equipo original' });
+  if (!process.env.LEGACY_ADMIN_USERNAME || session.username !== process.env.LEGACY_ADMIN_USERNAME) {
+    res.status(403).json({ error: 'Esta importación solo aplica a la cuenta original' });
     return;
   }
   try {
-    const result = await importIfEmpty(session.teamId, compromisosIniciales);
+    const result = await importIfEmpty(session.username, compromisosIniciales);
     res.status(200).json(result);
   } catch (e) {
     console.error(e);

@@ -35,10 +35,11 @@ export default function Setup() {
   const [msg, setMsg] = useState(null); // { type: 'ok'|'err', text }
   const [teams, setTeams] = useState([]);
 
-  const [teamForm, setTeamForm] = useState({ teamName: '', adminUsername: '', adminPassword: '', adminName: '' });
+  const [teamForm, setTeamForm] = useState({ teamName: '', adminUsername: '', adminPassword: '', adminName: '', grantCanCreateGroups: true });
   const [memberForm, setMemberForm] = useState({ teamId: '', username: '', password: '', name: '', role: 'member' });
   const [resetForm, setResetForm] = useState({ username: '', newPassword: '' });
-  const [migrateTeamId, setMigrateTeamId] = useState('');
+  const [migrateUsername, setMigrateUsername] = useState('');
+  const [permForm, setPermForm] = useState({ username: '', value: true });
 
   function showMsg(type, text) {
     setMsg({ type, text });
@@ -81,7 +82,7 @@ export default function Setup() {
     try {
       const r = await call('/api/setup/create-team', teamForm);
       showMsg('ok', `Equipo creado: "${teamForm.teamName}" (id: ${r.teamId}). Ya puede iniciar sesión con el usuario "${teamForm.adminUsername}".`);
-      setTeamForm({ teamName: '', adminUsername: '', adminPassword: '', adminName: '' });
+      setTeamForm({ teamName: '', adminUsername: '', adminPassword: '', adminName: '', grantCanCreateGroups: true });
       loadTeams();
     } catch (e) {
       showMsg('err', e.message);
@@ -114,8 +115,19 @@ export default function Setup() {
   async function submitMigrate(e) {
     e.preventDefault();
     try {
-      const r = await call('/api/setup/migrate-legacy', { teamId: migrateTeamId });
-      showMsg('ok', `Migración completa: ${r.total} compromiso(s) movidos al equipo "${migrateTeamId}".`);
+      const r = await call('/api/setup/migrate-legacy', { username: migrateUsername });
+      showMsg('ok', `Migración completa: ${r.migrados} compromiso(s) quedaron asignados a "${migrateUsername}" (de ${r.total} en total).`);
+    } catch (e) {
+      showMsg('err', e.message);
+    }
+  }
+
+  async function submitPermission(e) {
+    e.preventDefault();
+    try {
+      await call('/api/setup/grant-permission', permForm);
+      showMsg('ok', `Permiso ${permForm.value ? 'otorgado' : 'quitado'} a "${permForm.username}".`);
+      setPermForm({ username: '', value: true });
     } catch (e) {
       showMsg('err', e.message);
     }
@@ -163,6 +175,10 @@ export default function Setup() {
                 <Field label="Usuario de acceso" value={teamForm.adminUsername} onChange={(e) => setTeamForm({ ...teamForm, adminUsername: e.target.value })} required />
                 <Field label="Contraseña" type="text" value={teamForm.adminPassword} onChange={(e) => setTeamForm({ ...teamForm, adminPassword: e.target.value })} required />
               </div>
+              <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                <input type="checkbox" checked={teamForm.grantCanCreateGroups} onChange={(e) => setTeamForm({ ...teamForm, grantCanCreateGroups: e.target.checked })} />
+                Puede crear y administrar su propio equipo desde la app
+              </label>
               <button style={styles.btn} type="submit">Crear equipo</button>
             </form>
           </div>
@@ -209,21 +225,35 @@ export default function Setup() {
           </div>
 
           <div style={styles.card}>
-            <h2 style={styles.h2}>4. Migrar los compromisos antiguos a un equipo (una sola vez)</h2>
+            <h2 style={styles.h2}>4. Migrar los compromisos antiguos a una persona (una sola vez)</h2>
             <p style={{ ...styles.sub, marginBottom: 10 }}>
-              Usa esto solo una vez, para mover tus 45 compromisos originales al equipo que tú controles.
+              Usa esto solo una vez, para que los compromisos que ya existían en el sistema (de antes de este cambio) queden asignados a la cuenta que tú controles.
             </p>
             <form onSubmit={submitMigrate} style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
               <div style={{ flex: 1 }}>
-                <label style={styles.label}>Id del equipo destino</label>
-                <select style={styles.select} value={migrateTeamId} onChange={(e) => setMigrateTeamId(e.target.value)} required>
-                  <option value="">Selecciona un equipo…</option>
-                  {teams.map((t) => (
-                    <option key={t.teamId} value={t.teamId}>{t.name} ({t.teamId})</option>
-                  ))}
-                </select>
+                <Field label="Usuario destino" value={migrateUsername} onChange={(e) => setMigrateUsername(e.target.value)} required />
               </div>
               <button style={styles.btn} type="submit">Migrar</button>
+            </form>
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.h2}>5. Dar o quitar el permiso de crear equipo</h2>
+            <p style={{ ...styles.sub, marginBottom: 10 }}>
+              Para que alguien que ya tiene cuenta pueda armar y administrar su propio equipo desde la app (sin pasar por aquí).
+            </p>
+            <form onSubmit={submitPermission}>
+              <div style={styles.row}>
+                <Field label="Usuario" value={permForm.username} onChange={(e) => setPermForm({ ...permForm, username: e.target.value })} required />
+                <div>
+                  <label style={styles.label}>Permiso</label>
+                  <select style={styles.select} value={permForm.value ? '1' : '0'} onChange={(e) => setPermForm({ ...permForm, value: e.target.value === '1' })}>
+                    <option value="1">Otorgar</option>
+                    <option value="0">Quitar</option>
+                  </select>
+                </div>
+              </div>
+              <button style={styles.btn} type="submit">Guardar</button>
             </form>
           </div>
 

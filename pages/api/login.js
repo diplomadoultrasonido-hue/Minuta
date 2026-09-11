@@ -29,9 +29,9 @@ export default async function handler(req, res) {
       return;
     }
 
-    const token = createSessionToken({ username: user.username, teamId: user.teamId, role: user.role });
+    const token = createSessionToken({ username: user.username });
     res.setHeader('Set-Cookie', sessionCookieHeader(token));
-    res.status(200).json({ ok: true, role: user.role });
+    res.status(200).json({ ok: true });
   } catch (e) {
     console.error(e);
     res.status(500).json({ error: e.message || 'Error inesperado al iniciar sesión' });

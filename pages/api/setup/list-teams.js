@@ -1,5 +1,5 @@
 import { checkSetupSecret } from '../../../lib/setupAuth';
-import { listTeams, getTeamMembers } from '../../../lib/users';
+import { listGroups, getGroupMembers } from '../../../lib/users';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -9,9 +9,9 @@ export default async function handler(req, res) {
   try {
     const { setupSecret } = req.body || {};
     checkSetupSecret(setupSecret);
-    const teams = await listTeams();
+    const groups = await listGroups();
     const withMembers = await Promise.all(
-      teams.map(async (t) => ({ ...t, members: await getTeamMembers(t.teamId) }))
+      groups.map(async (g) => ({ ...g, teamId: g.groupId, members: await getGroupMembers(g.groupId) }))
     );
     res.status(200).json({ teams: withMembers });
   } catch (e) {

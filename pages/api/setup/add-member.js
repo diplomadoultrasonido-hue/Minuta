@@ -1,5 +1,5 @@
 import { checkSetupSecret } from '../../../lib/setupAuth';
-import { addTeamMember } from '../../../lib/users';
+import { addMemberToGroup } from '../../../lib/users';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   try {
     const { setupSecret, teamId, username, password, name, role } = req.body || {};
     checkSetupSecret(setupSecret);
-    const result = await addTeamMember({ teamId, username, password, name, role });
+    const result = await addMemberToGroup({ groupId: teamId, username, password, name, role });
     res.status(200).json({ ok: true, ...result });
   } catch (e) {
     console.error(e);
