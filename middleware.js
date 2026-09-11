@@ -30,7 +30,7 @@ async function verify(token, secret) {
   try {
     const json = atob(payloadB64.replace(/-/g, '+').replace(/_/g, '/'));
     const payload = JSON.parse(json);
-    if (payload.role !== 'viewer' && payload.role !== 'editor') return null;
+    if (!payload.username || !payload.teamId || (payload.role !== 'admin' && payload.role !== 'member')) return null;
     return payload;
   } catch (e) {
     return null;
@@ -67,5 +67,6 @@ export const config = {
     '/api/compromiso-avance',
     '/api/import-once',
     '/api/export',
+    '/api/profile',
   ],
 };

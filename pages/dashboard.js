@@ -204,6 +204,23 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
   .report-value{width:76px;font-size:11px;}
 }
 
+.notif-wrap{position:relative;}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:300px;max-width:88vw;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-modal);z-index:40;overflow:hidden;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .18s ease, transform .18s ease, background .2s ease, border-color .2s ease;}
+.notif-dropdown.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+.notif-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);font-size:12.5px;font-weight:600;}
+.notif-clear{background:none;border:none;color:var(--violet);font-size:10.5px;font-weight:600;cursor:pointer;}
+.notif-list{max-height:280px;overflow-y:auto;}
+.notif-item{display:flex;align-items:flex-start;gap:9px;padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s ease;}
+.notif-item:last-child{border-bottom:none;}
+.notif-item:hover{background:var(--surface-soft);}
+.notif-dot-status{width:8px;height:8px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.notif-text{font-size:12.5px;line-height:1.4;color:var(--ink);}
+.notif-meta{font-size:10.5px;color:var(--ink-faint);margin-top:2px;}
+.notif-empty{padding:26px 14px;text-align:center;font-size:12.5px;color:var(--ink-faint);}
+@media (max-width:720px){
+  .notif-dropdown{position:fixed;top:60px;right:10px;left:10px;width:auto;max-width:none;}
+}
+
 
 .fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(35,97,107,.5);cursor:pointer;z-index:20;transition:transform .15s ease;}
 .fab:active{transform:scale(.92);}
@@ -391,9 +408,18 @@ const BODY_HTML = `
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="fBuscar" placeholder="Buscar compromiso, área...">
         </div>
-        <div class="icon-btn" id="btnBell" title="Compromisos vencidos">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
-          <span class="dot" id="bellDot" style="display:none;"></span>
+        <div class="notif-wrap">
+          <div class="icon-btn" id="btnBell" title="Notificaciones">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 00-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span class="dot" id="bellDot" style="display:none;"></span>
+          </div>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-head">
+              <span>Notificaciones</span>
+              <button class="notif-clear" id="btnClearNotifs">Marcar todas como leídas</button>
+            </div>
+            <div class="notif-list" id="notifList"></div>
+          </div>
         </div>
         <div class="icon-btn" id="btnTheme" title="Cambiar tema">
           <span class="theme-ico">
@@ -452,6 +478,46 @@ const BODY_HTML = `
           <h3>Cumplimiento por responsable</h3>
           <div id="reportResp"></div>
         </div>
+      </div>
+    </div>
+
+    <div id="profileView" style="display:none;">
+      <div class="report-card" style="max-width:440px;">
+        <h3>Mi perfil</h3>
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+          <div class="avatar" id="profileAvatarPreview" style="width:56px;height:56px;font-size:18px;cursor:pointer;" title="Cambiar foto">–</div>
+          <div>
+            <button class="btn btn-ghost btn-sm" id="btnChangePhoto" type="button">Cambiar foto</button>
+            <input type="file" id="photoInput" accept="image/*" style="display:none;">
+          </div>
+        </div>
+        <div class="field">
+          <label>Nombre</label>
+          <input type="text" id="profileName">
+        </div>
+        <div class="field">
+          <label>Usuario</label>
+          <input type="text" id="profileUsername" disabled>
+        </div>
+        <div class="modal-actions" style="justify-content:flex-start;">
+          <button class="btn btn-primary" id="btnSaveProfile">Guardar cambios</button>
+        </div>
+
+        <div class="divider">
+          <h3>Cambiar contraseña</h3>
+          <div class="field">
+            <label>Contraseña actual</label>
+            <input type="password" id="profileCurrentPass">
+          </div>
+          <div class="field">
+            <label>Nueva contraseña (mínimo 6 caracteres)</label>
+            <input type="password" id="profileNewPass">
+          </div>
+          <div class="modal-actions" style="justify-content:flex-start;">
+            <button class="btn btn-primary" id="btnSavePassword">Cambiar contraseña</button>
+          </div>
+        </div>
+        <p id="profileRoleNote" style="font-size:11.5px;color:var(--ink-faint);margin:16px 0 0;"></p>
       </div>
     </div>
   </main>
@@ -683,8 +749,81 @@ export default function Dashboard() {
       });
       const navCount = document.getElementById('navCount');
       if (navCount) navCount.textContent = counts.Vencido;
-      const bellDot = document.getElementById('bellDot');
-      if (bellDot) bellDot.style.display = counts.Vencido > 0 ? 'block' : 'none';
+    }
+
+    // ---- Notificaciones (Nuevo / Abierto) ----
+    const NOTIF_STATUSES = ['Nuevo', 'Abierto'];
+    const NOTIF_KEY = 'minuta-dismissed-notifs';
+    function getDismissed() {
+      try {
+        return JSON.parse(localStorage.getItem(NOTIF_KEY) || '[]');
+      } catch (e) {
+        return [];
+      }
+    }
+    function setDismissed(arr) {
+      try {
+        localStorage.setItem(NOTIF_KEY, JSON.stringify(arr));
+      } catch (e) {
+        /* sin storage disponible */
+      }
+    }
+    function getNotifications() {
+      const dismissed = getDismissed();
+      return ALL.filter((c) => NOTIF_STATUSES.includes(c.status) && !dismissed.includes(c.id));
+    }
+    function updateBellDot() {
+      const count = getNotifications().length;
+      const dot = document.getElementById('bellDot');
+      if (dot) dot.style.display = count > 0 ? 'block' : 'none';
+    }
+    function renderNotifDropdown() {
+      const notifs = getNotifications();
+      const list = document.getElementById('notifList');
+      const dotColor = { Nuevo: '--slate', Abierto: '--violet' };
+      list.innerHTML = notifs.length
+        ? notifs
+            .map(
+              (c) => `
+        <div class="notif-item" data-notifid="${c.id}">
+          <span class="notif-dot-status" style="background:var(${dotColor[c.status] || '--slate'});"></span>
+          <div>
+            <div class="notif-text">${escapeHtml(c.compromiso)}</div>
+            <div class="notif-meta">${c.status} · ${escapeHtml(c.responsable || '—')}</div>
+          </div>
+        </div>
+      `
+            )
+            .join('')
+        : '<div class="notif-empty">No tienes notificaciones nuevas.</div>';
+      list.querySelectorAll('[data-notifid]').forEach((el) => {
+        el.addEventListener('click', () => {
+          const id = Number(el.getAttribute('data-notifid'));
+          dismissNotif(id);
+          closeNotifDropdown();
+          openEdit(id);
+        });
+      });
+      updateBellDot();
+    }
+    function dismissNotif(id) {
+      const dismissed = getDismissed();
+      if (!dismissed.includes(id)) {
+        dismissed.push(id);
+        setDismissed(dismissed);
+      }
+    }
+    function toggleNotifDropdown() {
+      const el = document.getElementById('notifDropdown');
+      if (el.classList.contains('show')) {
+        closeNotifDropdown();
+      } else {
+        renderNotifDropdown();
+        el.classList.add('show');
+      }
+    }
+    function closeNotifDropdown() {
+      document.getElementById('notifDropdown').classList.remove('show');
     }
 
 
@@ -779,8 +918,10 @@ export default function Dashboard() {
       document.getElementById('listView').style.display = view === 'list' ? 'block' : 'none';
       document.getElementById('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
       document.getElementById('reportsView').style.display = view === 'reports' ? 'block' : 'none';
+      document.getElementById('profileView').style.display = view === 'profile' ? 'block' : 'none';
       if (view === 'calendar') renderCalendar();
       if (view === 'reports') renderReports();
+      if (view === 'profile') fillProfileForm();
     }
 
     function renderReports() {
@@ -981,7 +1122,7 @@ export default function Dashboard() {
       renderList();
 
       const banner = document.getElementById('importBanner');
-      banner.classList.toggle('show', IS_EDITOR && ALL.length === 0);
+      banner.classList.toggle('show', !!(ME && ME.canImportLegacy) && ALL.length === 0);
 
       if (editingId) {
         const c = ALL.find((x) => String(x.id) === String(editingId));
@@ -989,25 +1130,40 @@ export default function Dashboard() {
       }
       if (currentView === 'calendar') renderCalendar();
       if (currentView === 'reports') renderReports();
+      updateBellDot();
     }
 
     function onErrorMsg(err) {
       document.getElementById('list').innerHTML = '<div class="empty">Error al cargar: ' + (err.message || err) + '</div>';
     }
 
+    let ME = null;
+
+    function applyAvatar(el, name, photo) {
+      if (!el) return;
+      if (photo) {
+        el.style.backgroundImage = `url(${photo})`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.textContent = '';
+      } else {
+        el.style.backgroundImage = '';
+        el.textContent = initials(name);
+      }
+    }
+
     async function loadAll() {
       try {
         const me = await apiGet('/api/me');
+        ME = me;
         IS_EDITOR = !!me.isEditor;
         document.getElementById('fabAdd').classList.toggle('hidden-role', !IS_EDITOR);
         document.getElementById('btnAdd').classList.toggle('hidden-role', !IS_EDITOR);
         document.getElementById('readOnlyBanner').classList.toggle('show', !IS_EDITOR);
-        const roleLabel = IS_EDITOR ? 'Editor' : 'Solo lectura';
-        const initialsLabel = IS_EDITOR ? 'ED' : 'VE';
-        document.getElementById('userName').textContent = 'Equipo Ultrasonido';
-        document.getElementById('userRole').textContent = roleLabel;
-        document.getElementById('userAvatar').textContent = initialsLabel;
-        document.getElementById('userAvatarMobile').textContent = initialsLabel;
+        document.getElementById('userName').textContent = me.name || me.username;
+        document.getElementById('userRole').textContent = me.isAdmin ? 'Administrador' : 'Miembro';
+        applyAvatar(document.getElementById('userAvatar'), me.name, me.photo);
+        applyAvatar(document.getElementById('userAvatarMobile'), me.name, me.photo);
       } catch (e) {
         return;
       }
@@ -1016,6 +1172,90 @@ export default function Dashboard() {
         onData(data);
       } catch (e) {
         onErrorMsg(e);
+      }
+    }
+
+    // ---- Perfil ----
+    let pendingPhoto = null; // data URL nueva, pendiente de guardar
+
+    function fillProfileForm() {
+      if (!ME) return;
+      pendingPhoto = null;
+      document.getElementById('profileName').value = ME.name || '';
+      document.getElementById('profileUsername').value = ME.username || '';
+      document.getElementById('profileCurrentPass').value = '';
+      document.getElementById('profileNewPass').value = '';
+      applyAvatar(document.getElementById('profileAvatarPreview'), ME.name, ME.photo);
+      document.getElementById('profileRoleNote').textContent =
+        (ME.isAdmin ? 'Eres administrador(a) de tu equipo.' : 'Eres miembro de tu equipo.') +
+        ' Para agregar o quitar personas de tu equipo, pide al operador de la app que lo haga.';
+    }
+
+    function resizeImageFile(file, maxSize, callback) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > height && width > maxSize) {
+            height = Math.round((height * maxSize) / width);
+            width = maxSize;
+          } else if (height > maxSize) {
+            width = Math.round((width * maxSize) / height);
+            height = maxSize;
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          callback(canvas.toDataURL('image/jpeg', 0.82));
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveProfile() {
+      const name = document.getElementById('profileName').value.trim();
+      if (!name) {
+        toast('El nombre no puede estar vacío');
+        return;
+      }
+      const payload = { name };
+      if (pendingPhoto) payload.photo = pendingPhoto;
+      try {
+        const updated = await apiSend('/api/profile', 'POST', payload);
+        ME = { ...ME, name: updated.name, photo: updated.photo };
+        pendingPhoto = null;
+        document.getElementById('userName').textContent = ME.name;
+        applyAvatar(document.getElementById('userAvatar'), ME.name, ME.photo);
+        applyAvatar(document.getElementById('userAvatarMobile'), ME.name, ME.photo);
+        applyAvatar(document.getElementById('profileAvatarPreview'), ME.name, ME.photo);
+        toast('Perfil actualizado');
+        loadAll();
+      } catch (e) {
+        toast(e.message || 'No se pudo guardar el perfil');
+      }
+    }
+
+    async function savePassword() {
+      const currentPassword = document.getElementById('profileCurrentPass').value;
+      const newPassword = document.getElementById('profileNewPass').value;
+      if (!currentPassword || !newPassword) {
+        toast('Completa ambos campos de contraseña');
+        return;
+      }
+      if (newPassword.length < 6) {
+        toast('La nueva contraseña debe tener al menos 6 caracteres');
+        return;
+      }
+      try {
+        await apiSend('/api/profile', 'POST', { currentPassword, newPassword });
+        document.getElementById('profileCurrentPass').value = '';
+        document.getElementById('profileNewPass').value = '';
+        toast('Contraseña actualizada');
+      } catch (e) {
+        toast(e.message || 'No se pudo cambiar la contraseña');
       }
     }
 
@@ -1196,6 +1436,22 @@ export default function Dashboard() {
     document.getElementById('btnSaveEdit').addEventListener('click', saveEdit);
     document.getElementById('btnSaveAvance').addEventListener('click', saveAvance);
     document.getElementById('btnImportar').addEventListener('click', importarInicial);
+    document.getElementById('btnChangePhoto').addEventListener('click', () => document.getElementById('photoInput').click());
+    document.getElementById('profileAvatarPreview').addEventListener('click', () => document.getElementById('photoInput').click());
+    document.getElementById('photoInput').addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      resizeImageFile(file, 240, (dataUrl) => {
+        pendingPhoto = dataUrl;
+        const preview = document.getElementById('profileAvatarPreview');
+        preview.style.backgroundImage = `url(${dataUrl})`;
+        preview.style.backgroundSize = 'cover';
+        preview.style.backgroundPosition = 'center';
+        preview.textContent = '';
+      });
+    });
+    document.getElementById('btnSaveProfile').addEventListener('click', saveProfile);
+    document.getElementById('btnSavePassword').addEventListener('click', savePassword);
     document.getElementById('btnExportar').addEventListener('click', () => {
       window.location.href = '/api/export';
     });
@@ -1203,9 +1459,25 @@ export default function Dashboard() {
     document.getElementById('btnLogoutMobile').addEventListener('click', logout);
     document.getElementById('btnTheme').addEventListener('click', toggleTheme);
     document.getElementById('btnThemeMobile').addEventListener('click', toggleTheme);
-    document.getElementById('btnBell').addEventListener('click', () => {
-      const vencidos = ALL.filter((c) => c.status === 'Vencido').length;
-      toast(vencidos > 0 ? `Tienes ${vencidos} compromiso(s) vencido(s)` : 'No hay compromisos vencidos');
+    document.getElementById('btnBell').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleNotifDropdown();
+    });
+    document.getElementById('btnClearNotifs').addEventListener('click', () => {
+      const ids = getNotifications().map((c) => c.id);
+      const dismissed = getDismissed();
+      ids.forEach((id) => {
+        if (!dismissed.includes(id)) dismissed.push(id);
+      });
+      setDismissed(dismissed);
+      renderNotifDropdown();
+    });
+    document.addEventListener('click', (e) => {
+      const dropdown = document.getElementById('notifDropdown');
+      const bell = document.getElementById('btnBell');
+      if (dropdown.classList.contains('show') && !dropdown.contains(e.target) && !bell.contains(e.target)) {
+        closeNotifDropdown();
+      }
     });
     ['overlayAdd', 'overlayEdit'].forEach((id) => {
       document.getElementById(id).addEventListener('click', (e) => {
@@ -1223,6 +1495,8 @@ export default function Dashboard() {
           showView('calendar');
         } else if (nav === 'reportes') {
           showView('reports');
+        } else if (nav === 'config') {
+          showView('profile');
         } else if (nav === 'compromisos') {
           showView('list');
         } else {

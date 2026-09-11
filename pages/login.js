@@ -4,9 +4,8 @@ import Head from 'next/head';
 
 export default function Login() {
   const router = useRouter();
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [editPassword, setEditPassword] = useState('');
-  const [showEdit, setShowEdit] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +17,7 @@ export default function Login() {
       const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password, editPassword: showEdit ? editPassword : '' }),
+        body: JSON.stringify({ username, password }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -41,35 +40,27 @@ export default function Login() {
       <div style={styles.page}>
         <form style={styles.card} onSubmit={handleSubmit}>
           <h1 style={styles.h1}>Minuta Ultrasonido</h1>
-          <p style={styles.subtitle}>Ingresa la contraseña para ver la minuta.</p>
+          <p style={styles.subtitle}>Ingresa con tu usuario y contraseña.</p>
 
-          <label style={styles.label}>Contraseña de acceso</label>
+          <label style={styles.label}>Usuario</label>
+          <input
+            style={styles.input}
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            autoFocus
+            autoCapitalize="none"
+            required
+          />
+
+          <label style={styles.label}>Contraseña</label>
           <input
             style={styles.input}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            autoFocus
             required
           />
-
-          {!showEdit && (
-            <button type="button" style={styles.linkBtn} onClick={() => setShowEdit(true)}>
-              ¿Tienes contraseña de edición?
-            </button>
-          )}
-
-          {showEdit && (
-            <>
-              <label style={styles.label}>Contraseña de edición (opcional)</label>
-              <input
-                style={styles.input}
-                type="password"
-                value={editPassword}
-                onChange={(e) => setEditPassword(e.target.value)}
-              />
-            </>
-          )}
 
           {error && <p style={styles.error}>{error}</p>}
 
@@ -110,16 +101,6 @@ const styles = {
     border: '1px solid #E1DFD9',
     borderRadius: 5,
     boxSizing: 'border-box',
-  },
-  linkBtn: {
-    background: 'none',
-    border: 'none',
-    color: '#23616B',
-    fontSize: 12.5,
-    padding: 0,
-    marginTop: 10,
-    cursor: 'pointer',
-    textDecoration: 'underline',
   },
   submit: {
     marginTop: 20,

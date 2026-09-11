@@ -1,124 +1,107 @@
-# Minuta Ultrasonido — App web con contraseña (sin Google)
+# Minuta Ultrasonido — con cuentas por persona y equipos separados
 
-Esta versión NO usa Google Sheets ni credenciales de Google. Los datos de la
-minuta se guardan en una base de datos **Redis** conectada a tu proyecto de
-Vercel (por ejemplo, vía la integración de Redis Cloud del Marketplace de
-Vercel). Todo lo demás (login con contraseña, modo editor, filtros, historial
-de avances) funciona igual que en las versiones anteriores.
+Cada persona entra con su propio usuario y contraseña. Puede haber varios
+**equipos** completamente aislados entre sí (por ejemplo, tu equipo y el de
+otra jefa) — nadie ve ni edita los compromisos de un equipo que no es el
+suyo, ni siquiera el operador de la app.
 
-## Qué necesitas antes de empezar
+## Qué necesitas
 
-1. Una cuenta de **GitHub** (gratis).
-2. Una cuenta de **Vercel** (gratis, puedes entrar con tu cuenta de GitHub en vercel.com).
+1. Una cuenta de **GitHub** y una de **Vercel** (ya las tienes).
+2. Una base de datos **Redis** conectada al proyecto (ya la tienes).
 
-No se requiere ninguna cuenta ni credencial de Google.
+## Paso 1 — Variables de entorno nuevas
 
-## Paso 1 — Subir el proyecto a GitHub
+En Vercel → Settings → Environment Variables, agrega (además de las que ya
+tenías: `KV_REDIS_URL`, `SESSION_SECRET`):
 
-```bash
-git init
-git add .
-git commit -m "Primera versión de la minuta web (sin Google)"
-git branch -M main
-git remote add origin https://github.com/TU-USUARIO/TU-REPO.git
-git push -u origin main
-```
+| Nombre | Valor |
+|---|---|
+| `SETUP_SECRET` | Una clave larga y secreta que **solo tú** vas a usar para crear cuentas |
 
-## Paso 2 — Desplegar en Vercel
+Puedes **borrar** `VIEW_PASSWORD` y `EDIT_PASSWORD` — ya no se usan.
 
-1. Entra a https://vercel.com → **"Add New… → Project"** → elige tu repositorio.
-2. Antes de darle **Deploy**, abre **"Environment Variables"** y agrega:
+Marca todas las variables para **Production, Preview y Development**, y
+vuelve a desplegar (Redeploy) para que tomen efecto.
 
-   | Nombre | Valor |
-   |---|---|
-   | `VIEW_PASSWORD` | La contraseña para **ver** la minuta |
-   | `EDIT_PASSWORD` | La contraseña para poder **editar** |
-   | `SESSION_SECRET` | Una cadena larga y aleatoria (`openssl rand -hex 32`) |
+## Paso 2 — Sube este código
 
-   (No agregues nada de Redis todavía, eso es el siguiente paso.)
-3. Haz clic en **Deploy**.
+Reemplaza el contenido de tu repositorio de GitHub con los archivos de este
+proyecto, como has hecho antes.
 
-## Paso 3 — Conectar la base de datos Redis
+## Paso 3 — Crea tu equipo desde /setup
 
-1. Dentro de tu proyecto en Vercel, ve a la pestaña **"Storage"**.
-2. Crea o conecta una base de datos de tipo **Redis** (por ejemplo, la
-   integración de Redis Cloud) a este proyecto.
-3. Al conectarla, Vercel agrega automáticamente una variable con la cadena de
-   conexión, normalmente `KV_REDIS_URL` (con el formato
-   `redis://default:contraseña@host:puerto`). El código ya busca esa
-   variable — si tu integración la nombra distinto (`REDIS_URL`, `KV_URL`),
-   también la detecta automáticamente.
-4. **Importante:** todas las variables relacionadas con Redis deben estar
-   marcadas para los tres entornos — **Production, Preview y Development** —
-   en Settings → Environment Variables. Si solo están en "Production" y
-   pruebas la app desde una URL de preview, no las va a encontrar.
-5. Ve a **"Deployments"** y dale **"Redeploy"** al último deployment para que
-   tome la nueva variable.
+1. Entra a `https://tu-app.vercel.app/setup`
+2. Escribe tu `SETUP_SECRET`.
+3. En **"1. Crear un equipo nuevo"**, crea tu propio equipo (ej. nombre
+   "Equipo de Miguel", tu usuario y contraseña). Anota el **id del equipo**
+   que te muestra el mensaje de confirmación (ej. `equipo-de-miguel`).
+4. Repite lo mismo para la otra jefa: un equipo nuevo con su propio usuario y
+   contraseña de administradora.
+5. Con **"2. Agregar una persona a un equipo existente"**, agrega ahí a cada
+   subordinado(a), eligiendo a qué equipo pertenece.
 
-## Cómo funciona la protección con contraseña
+## Paso 4 — Recupera tus compromisos actuales
 
-- Cualquiera que entre a la URL será mandado a una pantalla de login.
-- Con solo la **contraseña de acceso** (`VIEW_PASSWORD`) entra en modo **solo lectura**.
-- Con la **contraseña de edición** (`EDIT_PASSWORD`) además, entra en modo
-  **editor** y puede agregar compromisos, cambiar estados y registrar avances.
-- La sesión se guarda en una cookie firmada (nadie puede falsificarla sin
-  conocer `SESSION_SECRET`) y dura 30 días. El botón **"Salir"** la cierra.
+Como ya tenías compromisos cargados desde antes (los que ves en tu app hoy),
+usa la opción **"4. Migrar los compromisos antiguos a un equipo"** en
+`/setup`, seleccionando **tu propio equipo** como destino. Esto copia
+exactamente lo que tienes guardado ahorita mismo (no una copia vieja) hacia
+tu equipo nuevo.
 
-## Migrar tus compromisos actuales (un clic, sin instalar nada)
+Solo hazlo una vez, y solo para tu equipo — el de la otra jefa empieza vacío,
+ya que nunca ha tenido datos.
 
-Este proyecto ya trae, en `scripts/import-data.json`, tus compromisos actuales
-(convertidos desde tu Excel/Google Sheet), incluyendo el historial de avances.
+## Paso 5 (opcional) — Habilitar el botón "Importar compromisos iniciales"
 
-1. Entra a tu app y haz login con la **contraseña de edición**.
-2. Si la minuta está vacía, vas a ver un aviso arriba de la lista:
-   **"Importar compromisos iniciales"**. Dale clic.
-3. Listo — se cargan todos de un solo golpe. El aviso desaparece solo después.
+Si en vez del Paso 4 prefieres usar el botón dentro de la app (que carga una
+foto fija de tus 45 compromisos originales tomada en un momento anterior, no
+tus datos más recientes), agrega la variable `LEGACY_TEAM_ID` en Vercel con
+el id de tu equipo, y vuelve a desplegar. **No recomendado si ya usaste el
+Paso 4** — haría lo mismo pero con datos potencialmente desactualizados.
 
-Es seguro: si por error le das clic dos veces, o ya hay compromisos cargados,
-no duplica nada — simplemente no hace nada la segunda vez.
+## Cómo entra cada quien
 
-### Alternativa con Node (opcional, si tienes permisos para instalarlo)
+- Cada persona va a la URL normal de la app y entra con **su usuario y
+  contraseña** (no más contraseñas compartidas).
+- Ve únicamente los compromisos de su propio equipo — en la lista, el
+  calendario, los reportes y las exportaciones.
+- Cualquiera (administrador o miembro) puede agregar y editar compromisos de
+  su equipo.
+- Desde **"Configuración"**, cada quien cambia su nombre, foto de perfil y
+  contraseña.
+- El responsable de cada compromiso ahora se elige entre los miembros reales
+  de ese equipo (ya no es una lista fija de nombres).
 
-Para cargarlos a Redis desde tu computadora, después de completar los Pasos 1-3 de arriba:
+## Agregar personas o restablecer contraseñas después
 
-1. Instala la CLI de Vercel si no la tienes: `npm i -g vercel`
-2. Dentro de la carpeta del proyecto:
-   ```bash
-   npm install
-   vercel link              # conecta esta carpeta con tu proyecto en Vercel
-   vercel env pull .env.local
-   node scripts/import.js
-   ```
-3. Deberías ver: `Listo: se importaron 44 compromisos. next_id quedó en 44.`
-4. Entra a tu URL y confirma que aparecen todos los compromisos.
+Vuelve a `/setup` cuando lo necesites:
 
-El script no borra ni duplica nada si lo corres por error una segunda vez —
-se niega a importar si ya hay datos guardados. Si necesitas reimportar desde
-cero, borra las claves `compromisos` y `next_id` desde el dashboard de tu base
-de datos Redis, y vuelve a correr el script.
+- **"2. Agregar una persona"** para dar de alta a alguien nuevo en un equipo.
+- **"3. Restablecer una contraseña"** si alguien la olvidó.
+
+Nadie más ve esta página — no aparece en ningún menú, y sin la clave
+`SETUP_SECRET` no deja hacer nada.
+
+## Exportar a Excel
+
+Sigue funcionando igual, con el botón "Exportar" — pero ahora cada quien
+descarga solo los compromisos de su propio equipo.
 
 ## Desarrollo local (opcional)
 
 ```bash
 npm install
-vercel env pull .env.local   # trae las variables reales del proyecto en Vercel
+vercel env pull .env.local
 npm run dev
 ```
 
-Abre http://localhost:3000
+## Notas técnicas
 
-## Exportar a Excel
-
-Cualquiera con acceso a la minuta (modo lectura o edición) puede descargar el
-estado actual con el botón **"Exportar a Excel"** en la barra de filtros. Se
-descarga un `.xlsx` con la misma estructura que el Excel original: una hoja
-con los compromisos y otra hoja "Historial" con todos los avances.
-
-## Notas
-
-- El catálogo de áreas/responsables/estados está en `lib/store.js` (constante
-  `CATALOGO`) — edítalo ahí si cambian tus equipos o áreas.
-- Si ves el error "fetch failed" al cargar la minuta, casi siempre significa
-  que la variable de conexión a Redis no está disponible en el entorno donde
-  estás probando (ver Paso 3, punto 4) o que falta el Redeploy después de
-  conectar la base de datos.
+- Las contraseñas se guardan con hash seguro (bcrypt), nunca en texto plano.
+- Los datos de cada equipo viven bajo claves separadas en Redis
+  (`team:{id}:compromisos`, `team:{id}:next_id`), así que un error de
+  filtrado no puede mezclar accidentalmente los datos de dos equipos.
+- El catálogo de "áreas" y "estados" sigue siendo el mismo para todos los
+  equipos — puedes editarlo en `lib/store.js` (constante `CATALOGO_BASE`) si
+  hace falta.

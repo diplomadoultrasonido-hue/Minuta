@@ -7,7 +7,6 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Método no permitido' });
     return;
   }
-
   const session = getSessionFromRequestCookies(req.headers.cookie);
   if (!session) {
     res.status(401).json({ error: 'No autenticado' });
@@ -15,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { compromisos } = await getData();
+    const { compromisos } = await getData(session.teamId);
     const ordenados = compromisos.slice().sort((a, b) => a.id - b.id);
 
     const filasPrincipales = ordenados.map((c) => ({
@@ -35,7 +34,7 @@ export default async function handler(req, res) {
     ordenados.forEach((c) => {
       (c.historial || [])
         .slice()
-        .reverse() // más antiguo primero, como en el Excel original
+        .reverse()
         .forEach((h) => {
           filasHistorial.push({ ID_COMPROMISO: c.id, FECHA: h.fecha, AVANCE: h.avance });
         });

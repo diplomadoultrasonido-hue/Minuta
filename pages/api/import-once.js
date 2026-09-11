@@ -7,15 +7,17 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Método no permitido' });
     return;
   }
-
   const session = getSessionFromRequestCookies(req.headers.cookie);
-  if (!session || session.role !== 'editor') {
-    res.status(403).json({ error: 'No tienes permiso para importar datos' });
+  if (!session) {
+    res.status(401).json({ error: 'No autenticado' });
     return;
   }
-
+  if (!process.env.LEGACY_TEAM_ID || session.teamId !== process.env.LEGACY_TEAM_ID) {
+    res.status(403).json({ error: 'Esta importación solo aplica al equipo original' });
+    return;
+  }
   try {
-    const result = await importIfEmpty(compromisosIniciales);
+    const result = await importIfEmpty(session.teamId, compromisosIniciales);
     res.status(200).json(result);
   } catch (e) {
     console.error(e);
