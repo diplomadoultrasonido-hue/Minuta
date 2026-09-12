@@ -6,7 +6,7 @@ const PAGE_STYLES = `
 :root{
   --bg:#FAFAFA; --surface:#FFFFFF; --surface-soft:#FAFAFB; --border:#E7E7EC;
   --ink:#17181F; --ink-soft:#6B6C7C; --ink-faint:#9C9DAD;
-  --violet:#23616B; --violet-dark:#1A4B54; --violet-soft:#E7EFEF;
+  --violet:#5de0a8; --violet-dark:#1f9c6c; --violet-soft:#E3FBF1;
   --teal:#0BA6A0; --teal-soft:#E2F6F4;
   --amber:#E79A2E; --amber-soft:#FBF0DC;
   --coral:#E4534F; --coral-soft:#FCE9E8;
@@ -20,7 +20,7 @@ const PAGE_STYLES = `
 [data-theme="dark"]{
   --bg:#0F1015; --surface:#1A1B23; --surface-soft:#20212B; --border:#2B2C38;
   --ink:#EDEDF3; --ink-soft:#9C9DB5; --ink-faint:#6B6C82;
-  --violet:#2DC4BD; --violet-dark:#4FDAD3; --violet-soft:#123231;
+  --violet:#5de0a8; --violet-dark:#7CEFC0; --violet-soft:#0f3327;
   --teal:#2DC4BD; --teal-soft:#123231;
   --amber:#F0AC4C; --amber-soft:#332813;
   --coral:#EF6F6B; --coral-soft:#3A1E1D;
@@ -46,8 +46,8 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .app{display:grid;grid-template-columns:188px 1fr;min-height:100vh;}
 .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:18px 12px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
 .brand{display:flex;align-items:center;gap:9px;padding:4px 6px 20px;}
-.brand-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),#3a8a94);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.brand-mark svg{width:15px;height:15px;color:#fff;}
+.brand-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),#29a876);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-mark svg{width:15px;height:15px;color:#0b3d2e;}
 .brand-name{font-size:14.5px;letter-spacing:-0.01em;}
 .brand-sub{font-size:10.5px;color:var(--ink-faint);margin-top:-2px;}
 .nav{display:flex;flex-direction:column;gap:2px;margin-top:4px;}
@@ -58,7 +58,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .nav-item .count{margin-left:auto;font-size:10px;background:var(--coral-soft);color:var(--coral);padding:1px 6px;border-radius:20px;font-weight:600;transition:background .2s ease, color .2s ease;}
 .sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);}
 .user-chip{display:flex;align-items:center;gap:9px;padding:7px;border-radius:9px;}
-.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;background:var(--violet);}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#0b3d2e;flex-shrink:0;background:var(--violet);}
 .user-name{font-size:12px;font-weight:600;line-height:1.2;}
 .user-role{font-size:10.5px;color:var(--ink-faint);}
 .logout-btn{width:28px;height:28px;border:none;background:none;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);cursor:pointer;flex-shrink:0;margin-left:auto;transition:background .15s ease, color .15s ease;}
@@ -72,10 +72,10 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap;position:relative;z-index:25;}
 .page-header h1{font-size:24px;margin:0 0 3px;letter-spacing:-0.01em;}
 .page-header .lead{font-size:13px;color:var(--ink-soft);margin:0;}
-.header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
-.search-pill{position:relative;}
-.search-pill input{width:200px;padding:9px 12px 9px 32px;border-radius:9px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--ink);transition:box-shadow .15s ease, border-color .2s ease, background .2s ease, color .2s ease, width .2s ease;}
-.search-pill input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft);width:240px;}
+.header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;width:100%;}
+.search-pill{position:relative;flex:1;min-width:180px;max-width:460px;}
+.search-pill input{width:100%;padding:9px 12px 9px 32px;border-radius:9px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--ink);transition:box-shadow .15s ease, border-color .2s ease, background .2s ease, color .2s ease;}
+.search-pill input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft);}
 .search-pill svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--ink-faint);transition:stroke .2s ease;}
 .icon-btn{width:34px;height:34px;border-radius:9px;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .2s ease, border-color .2s ease, color .2s ease, transform .15s ease;}
 .icon-btn:hover{background:var(--surface-soft);}
@@ -90,7 +90,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .btn{border:none;border-radius:9px;font-size:13px;font-weight:600;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:transform .12s ease, box-shadow .15s ease, background .2s ease, color .2s ease, border-color .2s ease, opacity .15s ease;}
 .btn:active{transform:scale(.97);}
 .btn:disabled{opacity:.6;cursor:default;}
-.btn-primary{background:var(--violet);color:#fff;box-shadow:0 6px 16px -6px rgba(35,97,107,.45);}
+.btn-primary{background:var(--violet);color:#0b3d2e;box-shadow:0 6px 16px -6px rgba(31,156,108,.4);}
 .btn-primary:hover{background:var(--violet-dark);}
 .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border);}
 .btn-ghost:hover{background:var(--surface-soft);}
@@ -154,7 +154,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .cal-cell.outside{background:var(--bg);}
 .cal-cell.outside .cal-daynum{color:var(--ink-faint);}
 .cal-daynum{font-size:12px;font-weight:600;color:var(--ink);width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;}
-.cal-cell.today .cal-daynum{background:var(--violet);color:#fff;}
+.cal-cell.today .cal-daynum{background:var(--violet);color:#0b3d2e;}
 .cal-events{display:flex;flex-direction:column;gap:3px;overflow:hidden;}
 .cal-event{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease, color .2s ease;}
 .cal-event.nuevo{background:var(--slate-soft);color:var(--slate);}
@@ -170,7 +170,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .cal-agenda-day.empty-day{opacity:.55;}
 .cal-agenda-head{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
 .cal-agenda-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0;}
-.cal-agenda-day.today .cal-agenda-num{background:var(--violet);color:#fff;}
+.cal-agenda-day.today .cal-agenda-num{background:var(--violet);color:#0b3d2e;}
 .cal-agenda-dow{font-size:12.5px;font-weight:600;text-transform:capitalize;}
 .cal-agenda-events{display:flex;flex-direction:column;gap:5px;margin-top:6px;margin-left:32px;}
 .cal-agenda-empty{font-size:12px;color:var(--ink-faint);margin-left:32px;}
@@ -241,9 +241,9 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .tipo-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--surface-soft);color:var(--ink-soft);border:1px solid var(--border);}
 
 
-.fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(35,97,107,.5);cursor:pointer;z-index:20;transition:transform .15s ease;}
+.fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#0b3d2e;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(31,156,108,.45);cursor:pointer;z-index:20;transition:transform .15s ease;}
 .fab:active{transform:scale(.92);}
-.fab svg{width:22px;height:22px;stroke:#fff;stroke-width:2.4;}
+.fab svg{width:22px;height:22px;stroke:#0b3d2e;stroke-width:2.4;}
 
 .overlay{position:fixed;inset:0;background:rgba(23,26,46,.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s ease;}
 .overlay.show{opacity:1;pointer-events:auto;}
@@ -401,10 +401,10 @@ const BODY_HTML = `
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="theme-icon-moon"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
         </span>
       </div>
-      <div class="avatar" id="userAvatarMobile" style="width:28px;height:28px;font-size:11px;">–</div>
       <button class="icon-btn" id="btnLogoutMobile" title="Cerrar sesión" style="width:32px;height:32px;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
       </button>
+      <div class="avatar" id="userAvatarMobile" style="width:28px;height:28px;font-size:11px;">–</div>
     </div>
   </div>
 
@@ -418,7 +418,7 @@ const BODY_HTML = `
     </div>
 
     <div class="page-header enter" style="animation-delay:.02s;" id="pageHeader">
-      <div class="header-actions" style="width:100%;">
+      <div class="header-actions">
         <div class="search-pill" id="searchPillWrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="fBuscar" placeholder="Buscar compromiso, área...">
@@ -621,12 +621,10 @@ const BODY_HTML = `
       </div>
       <div class="row2">
         <div class="field">
-          <label>Solicitado por (opcional)</label>
+          <label>Solicitado por (opcional, una o varias)</label>
           <div class="assign-picker" id="nSolicitadoPicker">
-            <button type="button" class="btn btn-ghost btn-sm" id="nSolicitadoToggle" style="width:100%;justify-content:space-between;">
-              <span id="nSolicitadoLabel">Elegir persona…</span>
-              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-            </button>
+            <div class="assign-chips" id="nSolicitadoChips"></div>
+            <button type="button" class="btn btn-ghost btn-sm" id="nSolicitadoToggle">+ Agregar persona</button>
             <div class="assign-dropdown" id="nSolicitadoDropdown"></div>
           </div>
         </div>
@@ -712,10 +710,8 @@ const BODY_HTML = `
       <div class="field" id="eSolicitadoField">
         <label>Solicitado por</label>
         <div class="assign-picker" id="eSolicitadoPicker">
-          <button type="button" class="btn btn-ghost btn-sm" id="eSolicitadoToggle" style="width:100%;justify-content:space-between;">
-            <span id="eSolicitadoLabel">Elegir persona…</span>
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
+          <div class="assign-chips" id="eSolicitadoChips"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="eSolicitadoToggle">+ Agregar persona</button>
           <div class="assign-dropdown" id="eSolicitadoDropdown"></div>
         </div>
         <p id="eSolicitadoReadonly" style="font-size:12.5px;color:var(--ink-soft);margin:4px 0 0;display:none;"></p>
@@ -907,12 +903,11 @@ export default function Dashboard() {
       dropdownEl: document.getElementById('nAsignadoDropdown'),
       getOptions: () => CATALOGO.asignables || [],
     });
-    const nSolicitadoPicker = initSinglePicker({
+    const nSolicitadoPicker = initMultiPicker({
       toggleBtn: document.getElementById('nSolicitadoToggle'),
-      labelEl: document.getElementById('nSolicitadoLabel'),
+      chipsEl: document.getElementById('nSolicitadoChips'),
       dropdownEl: document.getElementById('nSolicitadoDropdown'),
       getOptions: () => CATALOGO.asignables || [],
-      placeholder: 'Elegir persona…',
     });
     const eAsignadoPicker = initMultiPicker({
       toggleBtn: document.getElementById('eAsignadoToggle'),
@@ -920,12 +915,11 @@ export default function Dashboard() {
       dropdownEl: document.getElementById('eAsignadoDropdown'),
       getOptions: () => CATALOGO.asignables || [],
     });
-    const eSolicitadoPicker = initSinglePicker({
+    const eSolicitadoPicker = initMultiPicker({
       toggleBtn: document.getElementById('eSolicitadoToggle'),
-      labelEl: document.getElementById('eSolicitadoLabel'),
+      chipsEl: document.getElementById('eSolicitadoChips'),
       dropdownEl: document.getElementById('eSolicitadoDropdown'),
       getOptions: () => CATALOGO.asignables || [],
-      placeholder: 'Elegir persona…',
     });
 
     function toast(msg) {
@@ -1653,7 +1647,7 @@ export default function Dashboard() {
       document.getElementById('nPrioridad').value = '';
       document.getElementById('nTipo').value = 'General';
       nAsignadoPicker.setSelected(ME ? [ME.username] : []);
-      nSolicitadoPicker.setSelected('');
+      nSolicitadoPicker.setSelected([]);
       document.getElementById('overlayAdd').classList.add('show');
     }
     function closeAdd() {
@@ -1747,7 +1741,7 @@ export default function Dashboard() {
       document.getElementById('eSolicitadoReadonly').style.display = editingIsCreator ? 'none' : 'block';
       if (editingIsCreator) {
         eAsignadoPicker.setSelected(c.assignedTo || []);
-        eSolicitadoPicker.setSelected(c.solicitadoPorUsername || '');
+        eSolicitadoPicker.setSelected(c.solicitadoPorUsernames || []);
       } else {
         document.getElementById('eAsignadoReadonly').textContent = c.responsable || '—';
         document.getElementById('eSolicitadoReadonly').textContent = c.solicitadoPor || 'Nadie';
