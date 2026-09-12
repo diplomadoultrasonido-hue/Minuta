@@ -69,7 +69,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .bottom-nav{display:none;}
 
 .main{padding:24px 34px 90px;width:100%;margin:0 auto;}
-.page-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap;}
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:20px;flex-wrap:wrap;position:relative;z-index:25;}
 .page-header h1{font-size:24px;margin:0 0 3px;letter-spacing:-0.01em;}
 .page-header .lead{font-size:13px;color:var(--ink-soft);margin:0;}
 .header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;}
@@ -205,7 +205,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 }
 
 .notif-wrap{position:relative;}
-.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:300px;max-width:88vw;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-modal);z-index:40;overflow:hidden;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .18s ease, transform .18s ease, background .2s ease, border-color .2s ease;}
+.notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:300px;max-width:88vw;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-modal);z-index:200;overflow:hidden;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .18s ease, transform .18s ease, background .2s ease, border-color .2s ease;}
 .notif-dropdown.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
 .notif-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--border);font-size:12.5px;font-weight:600;}
 .notif-clear{background:none;border:none;color:var(--violet);font-size:10.5px;font-weight:600;cursor:pointer;}
@@ -220,6 +220,25 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 @media (max-width:720px){
   .notif-dropdown{position:fixed;top:60px;right:10px;left:10px;width:auto;max-width:none;}
 }
+
+.assign-picker{position:relative;}
+.assign-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.assign-chip{display:inline-flex;align-items:center;gap:6px;background:var(--violet-soft);color:var(--violet-dark);font-size:12px;font-weight:600;padding:4px 6px 4px 10px;border-radius:20px;transition:background .2s ease, color .2s ease;}
+.assign-chip button{background:none;border:none;color:inherit;cursor:pointer;font-size:15px;line-height:1;padding:0 2px;opacity:.7;}
+.assign-chip button:hover{opacity:1;}
+.assign-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:220px;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:8px;box-shadow:var(--shadow-modal);z-index:80;display:none;}
+.assign-dropdown.show{display:block;}
+.assign-dropdown-item{padding:9px 12px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:9px;color:var(--ink);transition:background .15s ease;}
+.assign-dropdown-item:hover{background:var(--surface-soft);}
+.assign-dropdown-item.selected{color:var(--violet-dark);font-weight:600;}
+.assign-dropdown-item .check{width:14px;flex-shrink:0;color:var(--violet);}
+.assign-dropdown-empty{padding:14px 12px;font-size:12.5px;color:var(--ink-faint);font-style:italic;}
+
+.priority-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;}
+.priority-badge.alta{background:var(--coral-soft);color:var(--coral);}
+.priority-badge.media{background:var(--amber-soft);color:var(--amber);}
+.priority-badge.baja{background:var(--slate-soft);color:var(--slate);}
+.tipo-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--surface-soft);color:var(--ink-soft);border:1px solid var(--border);}
 
 
 .fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(35,97,107,.5);cursor:pointer;z-index:20;transition:transform .15s ease;}
@@ -596,16 +615,44 @@ const BODY_HTML = `
       </div>
       <div class="field">
         <label>Asignado a (elige una o varias personas)</label>
-        <div id="nAsignados" style="display:flex;flex-direction:column;gap:6px;max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;padding:8px 10px;"></div>
+        <div class="assign-picker" id="nAsignadoPicker">
+          <div class="assign-chips" id="nAsignadoChips"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="nAsignadoToggle">+ Agregar persona</button>
+          <div class="assign-dropdown" id="nAsignadoDropdown"></div>
+        </div>
       </div>
       <div class="row2">
         <div class="field">
-          <label>Solicitado por</label>
-          <input type="text" id="nSolicitadoPor" placeholder="Ej. Dr. Jhovan">
+          <label>Solicitado por (opcional)</label>
+          <div class="assign-picker" id="nSolicitadoPicker">
+            <button type="button" class="btn btn-ghost btn-sm" id="nSolicitadoToggle" style="width:100%;justify-content:space-between;">
+              <span id="nSolicitadoLabel">Elegir persona…</span>
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+            </button>
+            <div class="assign-dropdown" id="nSolicitadoDropdown"></div>
+          </div>
         </div>
         <div class="field">
           <label>Promesa de cierre</label>
           <input type="date" id="nPromesa">
+        </div>
+      </div>
+      <div class="row2">
+        <div class="field">
+          <label>Prioridad</label>
+          <select id="nPrioridad">
+            <option value="">Elige una prioridad…</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select id="nTipo">
+            <option value="General">General</option>
+            <option value="1:1">1:1</option>
+          </select>
         </div>
       </div>
       <div class="field">
@@ -637,8 +684,46 @@ const BODY_HTML = `
           <input type="date" id="ePromesa">
         </div>
       </div>
+      <div class="row2">
+        <div class="field">
+          <label>Prioridad</label>
+          <select id="ePrioridad">
+            <option value="">Elige una prioridad…</option>
+            <option value="Alta">Alta</option>
+            <option value="Media">Media</option>
+            <option value="Baja">Baja</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select id="eTipo">
+            <option value="General">General</option>
+            <option value="1:1">1:1</option>
+          </select>
+        </div>
+      </div>
+      <div class="field" id="eAsignadoField">
+        <label>Asignado a</label>
+        <div class="assign-picker" id="eAsignadoPicker">
+          <div class="assign-chips" id="eAsignadoChips"></div>
+          <button type="button" class="btn btn-ghost btn-sm" id="eAsignadoToggle">+ Agregar persona</button>
+          <div class="assign-dropdown" id="eAsignadoDropdown"></div>
+        </div>
+        <p id="eAsignadoReadonly" style="font-size:12.5px;color:var(--ink-soft);margin:4px 0 0;display:none;"></p>
+      </div>
+      <div class="field" id="eSolicitadoField">
+        <label>Solicitado por</label>
+        <div class="assign-picker" id="eSolicitadoPicker">
+          <button type="button" class="btn btn-ghost btn-sm" id="eSolicitadoToggle" style="width:100%;justify-content:space-between;">
+            <span id="eSolicitadoLabel">Elegir persona…</span>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <div class="assign-dropdown" id="eSolicitadoDropdown"></div>
+        </div>
+        <p id="eSolicitadoReadonly" style="font-size:12.5px;color:var(--ink-soft);margin:4px 0 0;display:none;"></p>
+      </div>
       <div class="modal-actions" id="editActions" style="margin-bottom:2px;">
-        <button class="btn btn-primary" id="btnSaveEdit">Guardar estado</button>
+        <button class="btn btn-primary" id="btnSaveEdit">Guardar cambios</button>
       </div>
 
       <div class="divider">
@@ -718,22 +803,131 @@ export default function Dashboard() {
         sel.appendChild(o);
       });
     }
-    function fillAsignadosCheckboxes(asignables) {
-      const box = document.getElementById('nAsignados');
-      if (!asignables.length) {
-        box.innerHTML = '<span style="font-size:12.5px;color:var(--ink-faint);">No tienes a nadie en tu equipo todavía.</span>';
-        return;
+    function initMultiPicker({ toggleBtn, chipsEl, dropdownEl, getOptions }) {
+      let selected = [];
+      function render() {
+        const options = getOptions();
+        chipsEl.innerHTML = selected.length
+          ? selected
+              .map((u) => {
+                const opt = options.find((o) => o.username === u);
+                return `<span class="assign-chip" data-u="${u}">${escapeHtml(opt ? opt.name : u)}<button type="button" data-remove="${u}">×</button></span>`;
+              })
+              .join('')
+          : '';
+        dropdownEl.innerHTML = options.length
+          ? options
+              .map(
+                (o) => `
+            <div class="assign-dropdown-item${selected.includes(o.username) ? ' selected' : ''}" data-u="${o.username}">
+              <span class="check">${selected.includes(o.username) ? '✓' : ''}</span>${escapeHtml(o.name)}
+            </div>`
+              )
+              .join('')
+          : '<div class="assign-dropdown-empty">No tienes a nadie en tu equipo todavía.</div>';
+
+        chipsEl.querySelectorAll('[data-remove]').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            selected = selected.filter((x) => x !== btn.getAttribute('data-remove'));
+            render();
+          });
+        });
+        dropdownEl.querySelectorAll('.assign-dropdown-item').forEach((item) => {
+          item.addEventListener('click', () => {
+            const u = item.getAttribute('data-u');
+            selected = selected.includes(u) ? selected.filter((x) => x !== u) : [...selected, u];
+            render();
+          });
+        });
       }
-      box.innerHTML = asignables
-        .map(
-          (a) => `
-        <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;">
-          <input type="checkbox" class="asignado-check" value="${a.username}"> ${escapeHtml(a.name)}
-        </label>
-      `
-        )
-        .join('');
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownEl.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+        if (!dropdownEl.contains(e.target) && !toggleBtn.contains(e.target)) dropdownEl.classList.remove('show');
+      });
+      return {
+        setSelected(next) {
+          selected = next || [];
+          render();
+        },
+        getSelected: () => selected,
+        render,
+      };
     }
+
+    function initSinglePicker({ toggleBtn, labelEl, dropdownEl, getOptions, placeholder }) {
+      let selected = '';
+      function render() {
+        const options = getOptions();
+        const current = options.find((o) => o.username === selected);
+        labelEl.textContent = current ? current.name : placeholder;
+        const noneItem = `<div class="assign-dropdown-item${!selected ? ' selected' : ''}" data-u=""><span class="check">${!selected ? '✓' : ''}</span>Ninguno</div>`;
+        const rest = options.length
+          ? options
+              .map(
+                (o) => `
+            <div class="assign-dropdown-item${selected === o.username ? ' selected' : ''}" data-u="${o.username}">
+              <span class="check">${selected === o.username ? '✓' : ''}</span>${escapeHtml(o.name)}
+            </div>`
+              )
+              .join('')
+          : '<div class="assign-dropdown-empty">No tienes a nadie en tu equipo todavía.</div>';
+        dropdownEl.innerHTML = noneItem + rest;
+
+        dropdownEl.querySelectorAll('.assign-dropdown-item').forEach((item) => {
+          item.addEventListener('click', () => {
+            selected = item.getAttribute('data-u') || '';
+            render();
+            dropdownEl.classList.remove('show');
+          });
+        });
+      }
+      toggleBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdownEl.classList.toggle('show');
+      });
+      document.addEventListener('click', (e) => {
+        if (!dropdownEl.contains(e.target) && !toggleBtn.contains(e.target)) dropdownEl.classList.remove('show');
+      });
+      return {
+        setSelected(next) {
+          selected = next || '';
+          render();
+        },
+        getSelected: () => selected,
+        render,
+      };
+    }
+
+    const nAsignadoPicker = initMultiPicker({
+      toggleBtn: document.getElementById('nAsignadoToggle'),
+      chipsEl: document.getElementById('nAsignadoChips'),
+      dropdownEl: document.getElementById('nAsignadoDropdown'),
+      getOptions: () => CATALOGO.asignables || [],
+    });
+    const nSolicitadoPicker = initSinglePicker({
+      toggleBtn: document.getElementById('nSolicitadoToggle'),
+      labelEl: document.getElementById('nSolicitadoLabel'),
+      dropdownEl: document.getElementById('nSolicitadoDropdown'),
+      getOptions: () => CATALOGO.asignables || [],
+      placeholder: 'Elegir persona…',
+    });
+    const eAsignadoPicker = initMultiPicker({
+      toggleBtn: document.getElementById('eAsignadoToggle'),
+      chipsEl: document.getElementById('eAsignadoChips'),
+      dropdownEl: document.getElementById('eAsignadoDropdown'),
+      getOptions: () => CATALOGO.asignables || [],
+    });
+    const eSolicitadoPicker = initSinglePicker({
+      toggleBtn: document.getElementById('eSolicitadoToggle'),
+      labelEl: document.getElementById('eSolicitadoLabel'),
+      dropdownEl: document.getElementById('eSolicitadoDropdown'),
+      getOptions: () => CATALOGO.asignables || [],
+      placeholder: 'Elegir persona…',
+    });
+
     function toast(msg) {
       const t = document.getElementById('toast');
       document.getElementById('toastMsg').textContent = msg;
@@ -931,12 +1125,18 @@ export default function Dashboard() {
         const respNames = (c.responsable || '').split(', ').filter(Boolean);
         const firstResp = respNames[0] || '—';
         const respLabel = respNames.length > 1 ? `${escapeHtml(firstResp)} +${respNames.length - 1}` : escapeHtml(firstResp);
+        const prioridadTag = c.prioridad
+          ? `<span class="priority-badge ${slug(c.prioridad)}">${c.prioridad}</span>`
+          : '';
+        const tipoTag = `<span class="tipo-badge">${escapeHtml(c.tipo || 'General')}</span>`;
         div.innerHTML = `
           <div class="card-bar ${slug(c.status)}"></div>
           <div class="card-main">
             <p class="compromiso">${escapeHtml(c.compromiso)}</p>
             <div class="card-meta">
               <span class="badge ${slug(c.status)}">${c.status}</span>
+              ${prioridadTag}
+              ${tipoTag}
               <span class="chip"><span class="resp-avatar" style="background:${avatarColor(firstResp)};">${initials(firstResp)}</span>${respLabel}</span>
               <span class="chip">Cierre: ${c.promesaCierre || 'sin fecha'}</span>
               ${overdue}
@@ -1184,7 +1384,10 @@ export default function Dashboard() {
       fillSelect(document.getElementById('fArea'), CATALOGO.areas, true, 'Área: todas');
       fillSelect(document.getElementById('fStatus'), STATUS_ORDER, true, 'Estado: todos');
       fillSelect(document.getElementById('nArea'), CATALOGO.areas, false);
-      fillAsignadosCheckboxes(CATALOGO.asignables || []);
+      nAsignadoPicker.render();
+      nSolicitadoPicker.render();
+      eAsignadoPicker.render();
+      eSolicitadoPicker.render();
       fillSelect(document.getElementById('eStatus'), STATUS_ORDER, false);
 
       renderStats();
@@ -1438,12 +1641,12 @@ export default function Dashboard() {
 
     function openAdd(presetIsoDate) {
       document.getElementById('nCompromiso').value = '';
-      document.getElementById('nSolicitadoPor').value = '';
       document.getElementById('nPromesa').value = presetIsoDate || '';
       document.getElementById('nComentarios').value = '';
-      document.querySelectorAll('.asignado-check').forEach((c) => {
-        c.checked = ME ? c.value === ME.username : false;
-      });
+      document.getElementById('nPrioridad').value = '';
+      document.getElementById('nTipo').value = 'General';
+      nAsignadoPicker.setSelected(ME ? [ME.username] : []);
+      nSolicitadoPicker.setSelected('');
       document.getElementById('overlayAdd').classList.add('show');
     }
     function closeAdd() {
@@ -1455,9 +1658,14 @@ export default function Dashboard() {
         toast('Escribe el compromiso');
         return;
       }
-      const assignedTo = Array.from(document.querySelectorAll('.asignado-check:checked')).map((c) => c.value);
+      const assignedTo = nAsignadoPicker.getSelected();
       if (assignedTo.length === 0) {
         toast('Elige al menos una persona en "Asignado a"');
+        return;
+      }
+      const prioridad = document.getElementById('nPrioridad').value;
+      if (!prioridad) {
+        toast('Elige una prioridad');
         return;
       }
       const payload = {
@@ -1466,7 +1674,9 @@ export default function Dashboard() {
         tema: '',
         compromiso,
         assignedTo,
-        solicitadoPor: document.getElementById('nSolicitadoPor').value,
+        solicitadoPor: nSolicitadoPicker.getSelected(),
+        prioridad,
+        tipo: document.getElementById('nTipo').value,
         promesaCierre: isoToDdmmyyyy(document.getElementById('nPromesa').value),
         status: 'Nuevo',
         comentarios: document.getElementById('nComentarios').value,
@@ -1502,21 +1712,39 @@ export default function Dashboard() {
         .join('');
     }
 
+    let editingIsCreator = false;
     function openEdit(id) {
       const c = ALL.find((x) => String(x.id) === String(id));
       if (!c) return;
       editingId = id;
+      editingIsCreator = !!(ME && c.assignedBy === ME.username);
       document.getElementById('editCompromisoTexto').textContent = c.compromiso;
       document.getElementById('eStatus').value = c.status;
       document.getElementById('ePromesa').value = ddmmyyyyToIso(c.promesaCierre);
+      document.getElementById('ePrioridad').value = c.prioridad || '';
+      document.getElementById('eTipo').value = c.tipo || 'General';
       document.getElementById('eAvance').value = '';
       renderTimeline(c.historial || []);
 
       document.getElementById('eStatus').disabled = !IS_EDITOR;
       document.getElementById('ePromesa').disabled = !IS_EDITOR;
+      document.getElementById('ePrioridad').disabled = !IS_EDITOR;
+      document.getElementById('eTipo').disabled = !IS_EDITOR;
       document.getElementById('editActions').style.display = IS_EDITOR ? 'flex' : 'none';
       document.getElementById('avanceField').style.display = IS_EDITOR ? 'flex' : 'none';
       document.getElementById('btnSaveAvance').style.display = IS_EDITOR ? 'inline-flex' : 'none';
+
+      document.getElementById('eAsignadoPicker').style.display = editingIsCreator ? 'block' : 'none';
+      document.getElementById('eAsignadoReadonly').style.display = editingIsCreator ? 'none' : 'block';
+      document.getElementById('eSolicitadoPicker').style.display = editingIsCreator ? 'block' : 'none';
+      document.getElementById('eSolicitadoReadonly').style.display = editingIsCreator ? 'none' : 'block';
+      if (editingIsCreator) {
+        eAsignadoPicker.setSelected(c.assignedTo || []);
+        eSolicitadoPicker.setSelected(c.solicitadoPorUsername || '');
+      } else {
+        document.getElementById('eAsignadoReadonly').textContent = c.responsable || '—';
+        document.getElementById('eSolicitadoReadonly').textContent = c.solicitadoPor || 'Nadie';
+      }
 
       document.getElementById('overlayEdit').classList.add('show');
     }
@@ -1526,14 +1754,26 @@ export default function Dashboard() {
     }
     async function saveEdit() {
       if (!editingId) return;
+      const prioridad = document.getElementById('ePrioridad').value;
+      if (!prioridad) {
+        toast('Elige una prioridad');
+        return;
+      }
       const updates = {
         status: document.getElementById('eStatus').value,
         promesaCierre: isoToDdmmyyyy(document.getElementById('ePromesa').value),
+        prioridad,
+        tipo: document.getElementById('eTipo').value,
       };
+      if (editingIsCreator) {
+        const assignedTo = eAsignadoPicker.getSelected();
+        if (assignedTo.length > 0) updates.assignedTo = assignedTo;
+        updates.solicitadoPor = eSolicitadoPicker.getSelected();
+      }
       try {
         const res = await apiSend('/api/compromiso-update', 'POST', { id: editingId, ...updates });
         onData(res);
-        toast('Estado actualizado');
+        toast('Cambios guardados');
       } catch (e) {
         toast(e.message || 'No se pudo actualizar');
       }

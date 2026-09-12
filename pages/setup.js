@@ -34,12 +34,15 @@ export default function Setup() {
   const [unlocked, setUnlocked] = useState(false);
   const [msg, setMsg] = useState(null); // { type: 'ok'|'err', text }
   const [teams, setTeams] = useState([]);
+  const [users, setUsers] = useState([]);
 
   const [teamForm, setTeamForm] = useState({ teamName: '', adminUsername: '', adminPassword: '', adminName: '', grantCanCreateGroups: true });
   const [memberForm, setMemberForm] = useState({ teamId: '', username: '', password: '', name: '', role: 'member' });
   const [resetForm, setResetForm] = useState({ username: '', newPassword: '' });
   const [migrateUsername, setMigrateUsername] = useState('');
   const [permForm, setPermForm] = useState({ username: '', value: true });
+  const [addToGroupForm, setAddToGroupForm] = useState({ username: '', groupId: '', role: 'member' });
+  const [renameForm, setRenameForm] = useState({ username: '', name: '' });
 
   function showMsg(type, text) {
     setMsg({ type, text });
@@ -66,12 +69,22 @@ export default function Setup() {
     }
   }
 
+  async function loadUsers() {
+    try {
+      const data = await call('/api/setup/list-users', {});
+      setUsers(data.users || []);
+    } catch (e) {
+      showMsg('err', e.message);
+    }
+  }
+
   async function unlock(e) {
     e.preventDefault();
     try {
       await call('/api/setup/list-teams', {});
       setUnlocked(true);
       loadTeams();
+      loadUsers();
     } catch (e) {
       showMsg('err', 'Clave incorrecta o no configurada en el servidor.');
     }
@@ -84,6 +97,7 @@ export default function Setup() {
       showMsg('ok', `Equipo creado: "${teamForm.teamName}" (id: ${r.teamId}). Ya puede iniciar sesión con el usuario "${teamForm.adminUsername}".`);
       setTeamForm({ teamName: '', adminUsername: '', adminPassword: '', adminName: '', grantCanCreateGroups: true });
       loadTeams();
+      loadUsers();
     } catch (e) {
       showMsg('err', e.message);
     }
@@ -96,6 +110,7 @@ export default function Setup() {
       showMsg('ok', `Cuenta creada: "${memberForm.username}" en el equipo seleccionado.`);
       setMemberForm({ teamId: memberForm.teamId, username: '', password: '', name: '', role: 'member' });
       loadTeams();
+      loadUsers();
     } catch (e) {
       showMsg('err', e.message);
     }
@@ -128,6 +143,44 @@ export default function Setup() {
       await call('/api/setup/grant-permission', permForm);
       showMsg('ok', `Permiso ${permForm.value ? 'otorgado' : 'quitado'} a "${permForm.username}".`);
       setPermForm({ username: '', value: true });
+      loadUsers();
+    } catch (e) {
+      showMsg('err', e.message);
+    }
+  }
+
+  async function submitAddToGroup(e) {
+    e.preventDefault();
+    try {
+      await call('/api/setup/add-member', { teamId: addToGroupForm.groupId, username: addToGroupForm.username, role: addToGroupForm.role });
+      showMsg('ok', `"${addToGroupForm.username}" agregado al equipo seleccionado.`);
+      setAddToGroupForm({ username: '', groupId: '', role: 'member' });
+      loadTeams();
+      loadUsers();
+    } catch (e) {
+      showMsg('err', e.message);
+    }
+  }
+
+  async function handleRemoveMember(groupId, username) {
+    if (!confirm(`¿Quitar a "${username}" de este equipo? No perderá acceso a lo que ya se le asignó, solo no se le podrán asignar cosas nuevas de ahí.`)) return;
+    try {
+      await call('/api/setup/remove-member', { groupId, username });
+      showMsg('ok', `"${username}" fue quitado del equipo.`);
+      loadTeams();
+      loadUsers();
+    } catch (e) {
+      showMsg('err', e.message);
+    }
+  }
+
+  async function submitRename(e) {
+    e.preventDefault();
+    try {
+      await call('/api/setup/rename-user', renameForm);
+      showMsg('ok', `Nombre actualizado para "${renameForm.username}".`);
+      setRenameForm({ username: '', name: '' });
+      loadUsers();
     } catch (e) {
       showMsg('err', e.message);
     }
@@ -255,6 +308,67 @@ export default function Setup() {
               </div>
               <button style={styles.btn} type="submit">Guardar</button>
             </form>
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.h2}>6. Agregar una persona existente a otro equipo</h2>
+            <form onSubmit={submitAddToGroup}>
+              <div style={styles.row}>
+                <Field label="Usuario existente" value={addToGroupForm.username} onChange={(e) => setAddToGroupForm({ ...addToGroupForm, username: e.target.value })} required />
+                <div>
+                  <label style={styles.label}>Equipo destino</label>
+                  <select style={styles.select} value={addToGroupForm.groupId} onChange={(e) => setAddToGroupForm({ ...addToGroupForm, groupId: e.target.value })} required>
+                    <option value="">Selecciona un equipo…</option>
+                    {teams.map((t) => (
+                      <option key={t.teamId} value={t.teamId}>{t.name} ({t.teamId})</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div style={{ maxWidth: 220 }}>
+                <label style={styles.label}>Rol en ese equipo</label>
+                <select style={styles.select} value={addToGroupForm.role} onChange={(e) => setAddToGroupForm({ ...addToGroupForm, role: e.target.value })}>
+                  <option value="member">Miembro</option>
+                  <option value="admin">Administrador</option>
+                </select>
+              </div>
+              <button style={styles.btn} type="submit">Agregar</button>
+            </form>
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.h2}>7. Cambiar el nombre de una persona</h2>
+            <form onSubmit={submitRename}>
+              <div style={styles.row}>
+                <Field label="Usuario" value={renameForm.username} onChange={(e) => setRenameForm({ ...renameForm, username: e.target.value })} required />
+                <Field label="Nuevo nombre" value={renameForm.name} onChange={(e) => setRenameForm({ ...renameForm, name: e.target.value })} required />
+              </div>
+              <button style={styles.btn} type="submit">Guardar</button>
+            </form>
+          </div>
+
+          <div style={styles.card}>
+            <h2 style={styles.h2}>Todos los usuarios y sus equipos</h2>
+            {users.length === 0 && <p style={styles.sub}>Aún no hay usuarios.</p>}
+            {users.map((u) => (
+              <div key={u.username} style={styles.teamBlock}>
+                <strong>{u.name}</strong> <span style={{ color: '#9C9DAD', fontSize: 11.5 }}>({u.username})</span>
+                {u.canCreateGroups && <span style={{ marginLeft: 8, fontSize: 11, color: '#23616B' }}>· puede crear equipo</span>}
+                {u.groups.length === 0 && <div style={styles.memberRow}>Sin equipos.</div>}
+                {u.groups.map((g) => (
+                  <div key={g.groupId} style={{ ...styles.memberRow, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>· {g.groupName} — {g.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMember(g.groupId, u.username)}
+                      style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#B23A32', fontSize: 11, cursor: 'pointer', textDecoration: 'underline' }}
+                    >
+                      Quitar de este equipo
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ))}
           </div>
 
           <div style={styles.card}>

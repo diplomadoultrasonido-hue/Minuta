@@ -24,6 +24,8 @@ export default async function handler(req, res) {
       'ACTIVIDAD/COMPROMISO': c.compromiso,
       RESPONSABLE: c.responsable,
       'SOLICITADO POR': c.solicitadoPor,
+      PRIORIDAD: c.prioridad || '',
+      TIPO: c.tipo || 'General',
       'PROMESA CIERRE': c.promesaCierre,
       'DIAS VENCIDO': c.diasVencido,
       STATUS: c.status,
