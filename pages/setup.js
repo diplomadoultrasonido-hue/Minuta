@@ -131,7 +131,13 @@ export default function Setup() {
     e.preventDefault();
     try {
       const r = await call('/api/setup/migrate-legacy', { username: migrateUsername });
-      showMsg('ok', `Migración completa: ${r.migrados} compromiso(s) quedaron asignados a "${migrateUsername}" (de ${r.total} en total).`);
+      if (r.total === 0) {
+        showMsg('err', `No se encontró NINGÚN compromiso en el sistema (total: 0). No hay nada que migrar todavía.`);
+      } else if (r.migrados === 0) {
+        showMsg('err', `Hay ${r.total} compromiso(s) en el sistema, pero los ${r.yaAsignados} ya tenían dueño asignado (probablemente ya migraste antes). No se movió nada nuevo.`);
+      } else {
+        showMsg('ok', `Listo: ${r.migrados} de ${r.total} compromiso(s) quedaron asignados a "${migrateUsername}".`);
+      }
     } catch (e) {
       showMsg('err', e.message);
     }

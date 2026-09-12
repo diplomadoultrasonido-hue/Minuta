@@ -237,7 +237,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .priority-badge{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;}
 .priority-badge.alta{background:var(--coral-soft);color:var(--coral);}
 .priority-badge.media{background:var(--amber-soft);color:var(--amber);}
-.priority-badge.baja{background:var(--slate-soft);color:var(--slate);}
+.priority-badge.baja{background:var(--green-soft);color:var(--green);}
 .tipo-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--surface-soft);color:var(--ink-soft);border:1px solid var(--border);}
 
 
@@ -417,13 +417,9 @@ const BODY_HTML = `
       <span>👁 Estás viendo esta minuta en modo solo lectura — no puedes agregar ni editar compromisos.</span>
     </div>
 
-    <div class="page-header enter" style="animation-delay:.02s;">
-      <div>
-        <h1 id="greeting">Minuta Ultrasonido</h1>
-        <p class="lead">Seguimiento de compromisos — Reunión de gerencia (Jefes)</p>
-      </div>
-      <div class="header-actions">
-        <div class="search-pill">
+    <div class="page-header enter" style="animation-delay:.02s;" id="pageHeader">
+      <div class="header-actions" style="width:100%;">
+        <div class="search-pill" id="searchPillWrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="fBuscar" placeholder="Buscar compromiso, área...">
         </div>
@@ -464,6 +460,8 @@ const BODY_HTML = `
         <select id="fResponsable"><option value="">Responsable: todos</option></select>
         <select id="fArea"><option value="">Área: todas</option></select>
         <select id="fStatus"><option value="">Estado: todos</option></select>
+        <select id="fPrioridad"><option value="">Prioridad: todas</option></select>
+        <select id="fTipo"><option value="">Tipo: todos</option></select>
         <div class="spacer"></div>
         <span class="count-note" id="countNote"></span>
       </div>
@@ -500,7 +498,7 @@ const BODY_HTML = `
       </div>
     </div>
 
-    <div id="profileView" style="display:none;">
+    <div id="profileView" style="display:none;max-width:700px;margin:0 auto;">
       <div class="report-card">
         <div style="max-width:440px;">
         <h3>Mi perfil</h3>
@@ -775,6 +773,8 @@ export default function Dashboard() {
     let IS_EDITOR = false;
 
     const STATUS_ORDER = ['Nuevo', 'Abierto', 'Acuerdo', 'Vencido', 'Cerrado'];
+    const PRIORIDAD_ORDER = ['Alta', 'Media', 'Baja'];
+    const TIPO_ORDER = ['1:1', 'General'];
 
     function slug(s) {
       return String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -1089,12 +1089,16 @@ export default function Dashboard() {
       const fr = document.getElementById('fResponsable').value;
       const fa = document.getElementById('fArea').value;
       const fs = document.getElementById('fStatus').value || activeStatFilter;
+      const fp = document.getElementById('fPrioridad').value;
+      const ft = document.getElementById('fTipo').value;
       const fb = document.getElementById('fBuscar').value.trim().toLowerCase();
 
       let filtered = ALL.filter((c) => {
         if (fr && !(c.responsable || '').split(', ').includes(fr)) return false;
         if (fa && c.area !== fa) return false;
         if (fs && c.status !== fs) return false;
+        if (fp && c.prioridad !== fp) return false;
+        if (ft && (c.tipo || 'General') !== ft) return false;
         if (fb) {
           const hay = [c.compromiso, c.area, c.responsable, c.solicitadoPor, c.comentarios, ...(c.historial || []).map((h) => h.avance)]
             .join(' ')
@@ -1186,6 +1190,7 @@ export default function Dashboard() {
       document.getElementById('calendarView').style.display = view === 'calendar' ? 'block' : 'none';
       document.getElementById('reportsView').style.display = view === 'reports' ? 'block' : 'none';
       document.getElementById('profileView').style.display = view === 'profile' ? 'block' : 'none';
+      document.getElementById('searchPillWrap').style.display = view === 'list' ? 'block' : 'none';
       if (view === 'calendar') renderCalendar();
       if (view === 'reports') renderReports();
       if (view === 'profile') fillProfileForm();
@@ -1383,6 +1388,8 @@ export default function Dashboard() {
       fillSelect(document.getElementById('fResponsable'), CATALOGO.responsables, true, 'Responsable: todos');
       fillSelect(document.getElementById('fArea'), CATALOGO.areas, true, 'Área: todas');
       fillSelect(document.getElementById('fStatus'), STATUS_ORDER, true, 'Estado: todos');
+      fillSelect(document.getElementById('fPrioridad'), PRIORIDAD_ORDER, true, 'Prioridad: todas');
+      fillSelect(document.getElementById('fTipo'), TIPO_ORDER, true, 'Tipo: todos');
       fillSelect(document.getElementById('nArea'), CATALOGO.areas, false);
       nAsignadoPicker.render();
       nSolicitadoPicker.render();
@@ -1837,6 +1844,8 @@ export default function Dashboard() {
       renderList();
     });
     document.getElementById('fBuscar').addEventListener('input', renderList);
+    document.getElementById('fPrioridad').addEventListener('change', renderList);
+    document.getElementById('fTipo').addEventListener('change', renderList);
 
     document.getElementById('btnAdd').addEventListener('click', () => openAdd());
     document.getElementById('fabAdd').addEventListener('click', () => openAdd());
