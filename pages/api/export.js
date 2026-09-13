@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     const filasPrincipales = ordenados.map((c) => ({
       'FECHA JUNTA': c.fecha,
-      ÁREA: c.area,
+      DEPARTAMENTO: c.area,
       TEMA: c.tema,
       'ACTIVIDAD/COMPROMISO': c.compromiso,
       RESPONSABLE: c.responsable,

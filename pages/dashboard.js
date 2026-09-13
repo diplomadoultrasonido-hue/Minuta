@@ -6,7 +6,7 @@ const PAGE_STYLES = `
 :root{
   --bg:#FAFAFA; --surface:#FFFFFF; --surface-soft:#FAFAFB; --border:#E7E7EC;
   --ink:#17181F; --ink-soft:#6B6C7C; --ink-faint:#9C9DAD;
-  --violet:#5de0a8; --violet-dark:#1f9c6c; --violet-soft:#E3FBF1;
+  --violet:#F59E0B; --violet-dark:#D97706; --violet-soft:#FEF3E2;
   --teal:#0BA6A0; --teal-soft:#E2F6F4;
   --amber:#E79A2E; --amber-soft:#FBF0DC;
   --coral:#E4534F; --coral-soft:#FCE9E8;
@@ -20,7 +20,7 @@ const PAGE_STYLES = `
 [data-theme="dark"]{
   --bg:#0F1015; --surface:#1A1B23; --surface-soft:#20212B; --border:#2B2C38;
   --ink:#EDEDF3; --ink-soft:#9C9DB5; --ink-faint:#6B6C82;
-  --violet:#5de0a8; --violet-dark:#7CEFC0; --violet-soft:#0f3327;
+  --violet:#F59E0B; --violet-dark:#FBBF24; --violet-soft:#3a2a10;
   --teal:#2DC4BD; --teal-soft:#123231;
   --amber:#F0AC4C; --amber-soft:#332813;
   --coral:#EF6F6B; --coral-soft:#3A1E1D;
@@ -46,8 +46,8 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .app{display:grid;grid-template-columns:188px 1fr;min-height:100vh;}
 .sidebar{background:var(--surface);border-right:1px solid var(--border);padding:18px 12px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;}
 .brand{display:flex;align-items:center;gap:9px;padding:4px 6px 20px;}
-.brand-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),#29a876);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-.brand-mark svg{width:15px;height:15px;color:#0b3d2e;}
+.brand-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--violet),#c2660a);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.brand-mark svg{width:15px;height:15px;color:#fff;}
 .brand-name{font-size:14.5px;letter-spacing:-0.01em;}
 .brand-sub{font-size:10.5px;color:var(--ink-faint);margin-top:-2px;}
 .nav{display:flex;flex-direction:column;gap:2px;margin-top:4px;}
@@ -58,7 +58,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .nav-item .count{margin-left:auto;font-size:10px;background:var(--coral-soft);color:var(--coral);padding:1px 6px;border-radius:20px;font-weight:600;transition:background .2s ease, color .2s ease;}
 .sidebar-footer{margin-top:auto;padding-top:12px;border-top:1px solid var(--border);}
 .user-chip{display:flex;align-items:center;gap:9px;padding:7px;border-radius:9px;}
-.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#0b3d2e;flex-shrink:0;background:var(--violet);}
+.avatar{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0;background:var(--violet);}
 .user-name{font-size:12px;font-weight:600;line-height:1.2;}
 .user-role{font-size:10.5px;color:var(--ink-faint);}
 .logout-btn{width:28px;height:28px;border:none;background:none;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--ink-faint);cursor:pointer;flex-shrink:0;margin-left:auto;transition:background .15s ease, color .15s ease;}
@@ -73,7 +73,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .page-header h1{font-size:24px;margin:0 0 3px;letter-spacing:-0.01em;}
 .page-header .lead{font-size:13px;color:var(--ink-soft);margin:0;}
 .header-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;width:100%;}
-.search-pill{position:relative;flex:1;min-width:180px;max-width:460px;}
+.search-pill{position:relative;flex:1;min-width:180px;}
 .search-pill input{width:100%;padding:9px 12px 9px 32px;border-radius:9px;border:1px solid var(--border);background:var(--surface);font-size:13px;color:var(--ink);transition:box-shadow .15s ease, border-color .2s ease, background .2s ease, color .2s ease;}
 .search-pill input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px var(--violet-soft);}
 .search-pill svg{position:absolute;left:10px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--ink-faint);transition:stroke .2s ease;}
@@ -90,7 +90,8 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .btn{border:none;border-radius:9px;font-size:13px;font-weight:600;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:transform .12s ease, box-shadow .15s ease, background .2s ease, color .2s ease, border-color .2s ease, opacity .15s ease;}
 .btn:active{transform:scale(.97);}
 .btn:disabled{opacity:.6;cursor:default;}
-.btn-primary{background:var(--violet);color:#0b3d2e;box-shadow:0 6px 16px -6px rgba(31,156,108,.4);}
+.btn-primary{background:var(--violet);color:#FFFFFF;box-shadow:0 6px 16px -6px rgba(245,158,11,.45);}
+.btn-primary:hover{background:var(--violet-dark);opacity:1;}
 .btn-primary:hover{background:var(--violet-dark);}
 .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--border);}
 .btn-ghost:hover{background:var(--surface-soft);}
@@ -154,7 +155,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .cal-cell.outside{background:var(--bg);}
 .cal-cell.outside .cal-daynum{color:var(--ink-faint);}
 .cal-daynum{font-size:12px;font-weight:600;color:var(--ink);width:20px;height:20px;display:flex;align-items:center;justify-content:center;border-radius:50%;flex-shrink:0;}
-.cal-cell.today .cal-daynum{background:var(--violet);color:#0b3d2e;}
+.cal-cell.today .cal-daynum{background:var(--violet);color:#fff;}
 .cal-events{display:flex;flex-direction:column;gap:3px;overflow:hidden;}
 .cal-event{font-size:10px;font-weight:600;padding:2px 6px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .2s ease, color .2s ease;}
 .cal-event.nuevo{background:var(--slate-soft);color:var(--slate);}
@@ -170,7 +171,7 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .cal-agenda-day.empty-day{opacity:.55;}
 .cal-agenda-head{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
 .cal-agenda-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--ink);flex-shrink:0;}
-.cal-agenda-day.today .cal-agenda-num{background:var(--violet);color:#0b3d2e;}
+.cal-agenda-day.today .cal-agenda-num{background:var(--violet);color:#fff;}
 .cal-agenda-dow{font-size:12.5px;font-weight:600;text-transform:capitalize;}
 .cal-agenda-events{display:flex;flex-direction:column;gap:5px;margin-top:6px;margin-left:32px;}
 .cal-agenda-empty{font-size:12px;color:var(--ink-faint);margin-left:32px;}
@@ -241,9 +242,10 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 .tipo-badge{display:inline-flex;align-items:center;font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--surface-soft);color:var(--ink-soft);border:1px solid var(--border);}
 
 
-.fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#0b3d2e;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(31,156,108,.45);cursor:pointer;z-index:20;transition:transform .15s ease;}
+.fab{position:fixed;bottom:28px;right:24px;width:52px;height:52px;border-radius:50%;background:var(--violet);color:#fff;display:none;align-items:center;justify-content:center;box-shadow:0 10px 24px -6px rgba(245,158,11,.5);cursor:pointer;z-index:20;transition:transform .15s ease, background .15s ease;}
+.fab:hover{background:var(--violet-dark);}
 .fab:active{transform:scale(.92);}
-.fab svg{width:22px;height:22px;stroke:#0b3d2e;stroke-width:2.4;}
+.fab svg{width:22px;height:22px;stroke:#fff;stroke-width:2.4;}
 
 .overlay{position:fixed;inset:0;background:rgba(23,26,46,.42);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s ease;}
 .overlay.show{opacity:1;pointer-events:auto;}
@@ -295,14 +297,14 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
 @media (max-width:720px){
   .app{grid-template-columns:1fr;}
   .sidebar{display:none;}
-  .mobile-topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:15;}
+  .mobile-topbar{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;background:var(--surface);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:15;}
   .mobile-topbar .brand{padding:0;}
   .bottom-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--surface);border-top:1px solid var(--border);padding:8px 6px calc(8px + env(safe-area-inset-bottom));justify-content:space-around;z-index:20;}
   .bottom-nav .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--ink-faint);font-size:9.5px;font-weight:500;cursor:pointer;}
   .bottom-nav .bn-item svg{width:18px;height:18px;stroke:var(--ink-faint);}
   .bottom-nav .bn-item.active{color:var(--violet);}
   .bottom-nav .bn-item.active svg{stroke:var(--violet);}
-  .main{padding:16px 14px 100px;}
+  .main{padding:64px 14px 100px;}
   .page-header{gap:10px;}
   .header-actions{width:100%;gap:8px;}
   .header-actions .icon-btn,.header-actions .btn-primary{display:none;}
@@ -421,7 +423,7 @@ const BODY_HTML = `
       <div class="header-actions">
         <div class="search-pill" id="searchPillWrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input type="text" id="fBuscar" placeholder="Buscar compromiso, área...">
+          <input type="text" id="fBuscar" placeholder="Buscar compromiso, departamento...">
         </div>
         <div class="notif-wrap">
           <div class="icon-btn" id="btnBell" title="Notificaciones">
@@ -458,7 +460,7 @@ const BODY_HTML = `
 
       <div class="toolbar">
         <select id="fResponsable"><option value="">Responsable: todos</option></select>
-        <select id="fArea"><option value="">Área: todas</option></select>
+        <select id="fArea"><option value="">Departamento: todos</option></select>
         <select id="fStatus"><option value="">Estado: todos</option></select>
         <select id="fPrioridad"><option value="">Prioridad: todas</option></select>
         <select id="fTipo"><option value="">Tipo: todos</option></select>
@@ -488,7 +490,7 @@ const BODY_HTML = `
     <div id="reportsView" style="display:none;">
       <div class="reports-grid">
         <div class="report-card">
-          <h3>Compromisos por área</h3>
+          <h3>Compromisos por departamento</h3>
           <div id="reportArea"></div>
         </div>
         <div class="report-card">
@@ -608,7 +610,7 @@ const BODY_HTML = `
         <textarea id="nCompromiso" placeholder="Describe el compromiso acordado en la reunión"></textarea>
       </div>
       <div class="field">
-        <label>Área</label>
+        <label>Departamento</label>
         <select id="nArea"></select>
       </div>
       <div class="field">
@@ -1142,7 +1144,7 @@ export default function Dashboard() {
             </div>
           </div>
           <div class="card-side">
-            <span class="area-tag">${escapeHtml(c.area || 'Sin área')}</span>
+            <span class="area-tag">${escapeHtml(c.area || 'Sin departamento')}</span>
           </div>
         `;
         div.addEventListener('click', () => openEdit(c.id));
@@ -1198,7 +1200,7 @@ export default function Dashboard() {
     function renderReportArea() {
       const counts = {};
       ALL.forEach((c) => {
-        const a = c.area || 'Sin área';
+        const a = c.area || 'Sin departamento';
         counts[a] = (counts[a] || 0) + 1;
       });
       const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
@@ -1380,7 +1382,7 @@ export default function Dashboard() {
       ALL = res.compromisos;
       CATALOGO = res.catalogo;
       fillSelect(document.getElementById('fResponsable'), CATALOGO.responsables, true, 'Responsable: todos');
-      fillSelect(document.getElementById('fArea'), CATALOGO.areas, true, 'Área: todas');
+      fillSelect(document.getElementById('fArea'), CATALOGO.areas, true, 'Departamento: todos');
       fillSelect(document.getElementById('fStatus'), STATUS_ORDER, true, 'Estado: todos');
       fillSelect(document.getElementById('fPrioridad'), PRIORIDAD_ORDER, true, 'Prioridad: todas');
       fillSelect(document.getElementById('fTipo'), TIPO_ORDER, true, 'Tipo: todos');
