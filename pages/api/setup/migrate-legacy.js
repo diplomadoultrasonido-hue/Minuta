@@ -7,10 +7,10 @@ export default async function handler(req, res) {
     return;
   }
   try {
-    const { setupSecret, username } = req.body || {};
+    const { setupSecret, username, force } = req.body || {};
     checkSetupSecret(setupSecret);
     if (!username) throw new Error('Falta el usuario destino');
-    const result = await migrateLegacyDataToUser(username);
+    const result = await migrateLegacyDataToUser(username, !!force);
     res.status(200).json({ ok: true, ...result });
   } catch (e) {
     console.error(e);

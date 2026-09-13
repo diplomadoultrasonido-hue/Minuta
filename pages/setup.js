@@ -40,6 +40,7 @@ export default function Setup() {
   const [memberForm, setMemberForm] = useState({ teamId: '', username: '', password: '', name: '', role: 'member' });
   const [resetForm, setResetForm] = useState({ username: '', newPassword: '' });
   const [migrateUsername, setMigrateUsername] = useState('');
+  const [migrateForce, setMigrateForce] = useState(false);
   const [permForm, setPermForm] = useState({ username: '', value: true });
   const [addToGroupForm, setAddToGroupForm] = useState({ username: '', groupId: '', role: 'member' });
   const [renameForm, setRenameForm] = useState({ username: '', name: '' });
@@ -130,13 +131,16 @@ export default function Setup() {
   async function submitMigrate(e) {
     e.preventDefault();
     try {
-      const r = await call('/api/setup/migrate-legacy', { username: migrateUsername });
+      const r = await call('/api/setup/migrate-legacy', { username: migrateUsername, force: migrateForce });
+      const dueños = r.dueñosAntes
+        ? ' Dueños actuales antes de migrar: ' + Object.entries(r.dueñosAntes).map(([u, n]) => `${u} (${n})`).join(', ') + '.'
+        : '';
       if (r.total === 0) {
         showMsg('err', `No se encontró NINGÚN compromiso en el sistema (total: 0). No hay nada que migrar todavía.`);
       } else if (r.migrados === 0) {
-        showMsg('err', `Hay ${r.total} compromiso(s) en el sistema, pero los ${r.yaAsignados} ya tenían dueño asignado (probablemente ya migraste antes). No se movió nada nuevo.`);
+        showMsg('err', `Hay ${r.total} compromiso(s) en el sistema, pero los ${r.yaAsignados} ya tenían dueño asignado.${dueños} Si quieres reasignarlos todos a "${migrateUsername}" de todas formas, marca "Forzar" y vuelve a intentar.`);
       } else {
-        showMsg('ok', `Listo: ${r.migrados} de ${r.total} compromiso(s) quedaron asignados a "${migrateUsername}".`);
+        showMsg('ok', `Listo: ${r.migrados} de ${r.total} compromiso(s) quedaron asignados a "${migrateUsername}".${dueños}`);
       }
     } catch (e) {
       showMsg('err', e.message);
@@ -288,11 +292,17 @@ export default function Setup() {
             <p style={{ ...styles.sub, marginBottom: 10 }}>
               Usa esto solo una vez, para que los compromisos que ya existían en el sistema (de antes de este cambio) queden asignados a la cuenta que tú controles.
             </p>
-            <form onSubmit={submitMigrate} style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-              <div style={{ flex: 1 }}>
-                <Field label="Usuario destino" value={migrateUsername} onChange={(e) => setMigrateUsername(e.target.value)} required />
+            <form onSubmit={submitMigrate}>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', marginBottom: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <Field label="Usuario destino" value={migrateUsername} onChange={(e) => setMigrateUsername(e.target.value)} required />
+                </div>
+                <button style={styles.btn} type="submit">Migrar</button>
               </div>
-              <button style={styles.btn} type="submit">Migrar</button>
+              <label style={{ ...styles.label, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <input type="checkbox" checked={migrateForce} onChange={(e) => setMigrateForce(e.target.checked)} />
+                Forzar — reasignar TODOS los compromisos a este usuario, incluso los que ya tienen dueño
+              </label>
             </form>
           </div>
 

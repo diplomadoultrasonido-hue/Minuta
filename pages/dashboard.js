@@ -33,6 +33,7 @@ const PAGE_STYLES = `
 *{box-sizing:border-box;min-width:0;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s ease, color .25s ease, background-color .2s ease;}
 svg{display:block;}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.22s;animation-timing-function:ease;}
 .sidebar,.card,.stat-card,.modal,.mobile-topbar,.bottom-nav,
 .toolbar select,.field select,.field input,.field textarea,.search-pill input,
 .icon-btn,.btn-ghost,.badge,.chip .resp-avatar,.avatar{
@@ -500,9 +501,9 @@ const BODY_HTML = `
       </div>
     </div>
 
-    <div id="profileView" style="display:none;max-width:700px;margin:0 auto;">
+    <div id="profileView" style="display:none;max-width:520px;margin:0 auto;">
       <div class="report-card">
-        <div style="max-width:440px;margin:0 auto;">
+        <div>
         <h3>Mi perfil</h3>
         <div style="display:flex;align-items:center;justify-content:center;gap:14px;margin-bottom:18px;">
           <div class="avatar" id="profileAvatarPreview" style="width:56px;height:56px;font-size:18px;cursor:pointer;" title="Cambiar foto">–</div>
@@ -1840,8 +1841,15 @@ export default function Dashboard() {
     function toggleTheme() {
       const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
       const next = current === 'dark' ? 'light' : 'dark';
-      applyTheme(next);
-      storeTheme(next);
+      if (document.startViewTransition) {
+        document.startViewTransition(() => {
+          applyTheme(next);
+          storeTheme(next);
+        });
+      } else {
+        applyTheme(next);
+        storeTheme(next);
+      }
     }
     (function initTheme() {
       const stored = getStoredTheme();
