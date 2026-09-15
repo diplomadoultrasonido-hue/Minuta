@@ -71,5 +71,7 @@ export const config = {
     '/api/team/members',
     '/api/team/create',
     '/api/team/add-member',
+    '/api/team/remove-member',
+    '/api/tipos/add',
   ],
 };

@@ -325,6 +325,8 @@ button, select, input, textarea{font-family:'Inter',sans-serif;}
   .card-side{grid-column:span 2;flex-direction:row;align-items:center;justify-content:space-between;}
   .fab{display:flex;bottom:82px;}
   .row2{grid-template-columns:1fr;}
+  .overlay{align-items:flex-start;padding:70px 14px 20px;overflow-y:auto;}
+  .modal{max-height:none;margin-bottom:20px;}
 }
 `;
 
@@ -648,10 +650,7 @@ const BODY_HTML = `
         </div>
         <div class="field">
           <label>Tipo</label>
-          <select id="nTipo">
-            <option value="General">General</option>
-            <option value="1:1">1:1</option>
-          </select>
+          <select id="nTipo"></select>
         </div>
       </div>
       <div class="field">
@@ -671,6 +670,7 @@ const BODY_HTML = `
     <div class="modal-head">
       <h2>Seguimiento del compromiso</h2>
       <p class="modal-sub" id="editCompromisoTexto"></p>
+      <p id="modifyNotice" style="display:none;font-size:12px;background:var(--violet-soft);color:var(--violet-dark);padding:8px 10px;border-radius:8px;margin:0 0 4px;">👁 Este compromiso te lo asignó alguien más — solo quien lo creó o su administrador pueden modificarlo. Tú puedes agregar avances.</p>
     </div>
     <div class="modal-body">
       <div class="row2">
@@ -695,10 +695,7 @@ const BODY_HTML = `
         </div>
         <div class="field">
           <label>Tipo</label>
-          <select id="eTipo">
-            <option value="General">General</option>
-            <option value="1:1">1:1</option>
-          </select>
+          <select id="eTipo"></select>
         </div>
       </div>
       <div class="field" id="eAsignadoField">
@@ -802,6 +799,43 @@ export default function Dashboard() {
         sel.appendChild(o);
       });
     }
+
+    function fillTipoSelect(sel) {
+      const current = sel.value;
+      sel.innerHTML = '';
+      (CATALOGO.tipos || ['General', '1:1']).forEach((v) => {
+        const o = document.createElement('option');
+        o.value = v;
+        o.textContent = v;
+        sel.appendChild(o);
+      });
+      if (ME && ME.isAdmin) {
+        const o = document.createElement('option');
+        o.value = '__new__';
+        o.textContent = '+ Agregar tipo nuevo…';
+        sel.appendChild(o);
+      }
+      if (current && Array.from(sel.options).some((o) => o.value === current)) sel.value = current;
+    }
+
+    async function handleTipoChange(sel) {
+      if (sel.value !== '__new__') return;
+      const nombre = (prompt('Nombre del nuevo tipo (ej. "Seguimiento clínico"):') || '').trim();
+      if (!nombre) {
+        sel.value = 'General';
+        return;
+      }
+      try {
+        const res = await apiSend('/api/tipos/add', 'POST', { tipo: nombre });
+        CATALOGO = res.catalogo;
+        fillTipoSelect(sel);
+        sel.value = nombre;
+        toast('Tipo agregado');
+      } catch (e) {
+        toast(e.message || 'No se pudo agregar el tipo');
+        sel.value = 'General';
+      }
+    }
     function initMultiPicker({ toggleBtn, chipsEl, dropdownEl, getOptions }) {
       let selected = [];
       function render() {
@@ -815,7 +849,10 @@ export default function Dashboard() {
               .join('')
           : '';
         dropdownEl.innerHTML = options.length
-          ? options
+          ? `<div class="assign-dropdown-item${options.every((o) => selected.includes(o.username)) ? ' selected' : ''}" data-u="__all__">
+              <span class="check">${options.every((o) => selected.includes(o.username)) ? '✓' : ''}</span><strong>Todos</strong>
+            </div>` +
+            options
               .map(
                 (o) => `
             <div class="assign-dropdown-item${selected.includes(o.username) ? ' selected' : ''}" data-u="${o.username}">
@@ -834,7 +871,12 @@ export default function Dashboard() {
         dropdownEl.querySelectorAll('.assign-dropdown-item').forEach((item) => {
           item.addEventListener('click', () => {
             const u = item.getAttribute('data-u');
-            selected = selected.includes(u) ? selected.filter((x) => x !== u) : [...selected, u];
+            if (u === '__all__') {
+              const allSelected = options.every((o) => selected.includes(o.username));
+              selected = allSelected ? [] : options.map((o) => o.username);
+            } else {
+              selected = selected.includes(u) ? selected.filter((x) => x !== u) : [...selected, u];
+            }
             render();
           });
         });
@@ -1006,7 +1048,7 @@ export default function Dashboard() {
       if (navCount) navCount.textContent = counts.Vencido;
     }
 
-    // ---- Notificaciones (Nuevo / Abierto / Vencido / próximos a vencer) ----
+    // ---- Notificaciones (Nuevo / Abierto / Vencido / próximos a vencer / avances) ----
     const NOTIF_STATUSES = ['Nuevo', 'Abierto'];
     const NOTIF_DAYS_ANTES = 3;
     const NOTIF_KEY = 'minuta-dismissed-notifs';
@@ -1024,7 +1066,7 @@ export default function Dashboard() {
         /* sin storage disponible */
       }
     }
-    function notifReason(c) {
+    function statusNotifReason(c) {
       if (c.status === 'Vencido') return { label: 'Vencido', color: '--coral' };
       if (NOTIF_STATUSES.includes(c.status)) return { label: c.status, color: c.status === 'Nuevo' ? '--slate' : '--violet' };
       if (c.status !== 'Cerrado') {
@@ -1040,40 +1082,61 @@ export default function Dashboard() {
       }
       return null;
     }
-    function getNotifications() {
+    function getNotificationItems() {
       const dismissed = getDismissed();
-      return ALL.filter((c) => !dismissed.includes(c.id) && notifReason(c));
+      const items = [];
+      ALL.forEach((c) => {
+        if (!dismissed.includes(c.id)) {
+          const reason = statusNotifReason(c);
+          if (reason) items.push({ id: c.id, compromisoId: c.id, reason, compromiso: c });
+        }
+        if (ME && c.assignedBy === ME.username && (c.historial || []).length > 0) {
+          const ultimo = c.historial[0]; // el más reciente va primero
+          if (ultimo.by && ultimo.by !== ME.username) {
+            const avanceId = `avance-${c.id}-${c.historial.length}`;
+            if (!dismissed.includes(avanceId)) {
+              items.push({
+                id: avanceId,
+                compromisoId: c.id,
+                reason: { label: `Avance de ${ultimo.byName || ultimo.by}`, color: '--teal' },
+                compromiso: c,
+              });
+            }
+          }
+        }
+      });
+      return items;
     }
     function updateBellDot() {
-      const count = getNotifications().length;
+      const count = getNotificationItems().length;
       const dot = document.getElementById('bellDot');
       if (dot) dot.style.display = count > 0 ? 'block' : 'none';
     }
     function renderNotifDropdown() {
-      const notifs = getNotifications();
+      const items = getNotificationItems();
       const list = document.getElementById('notifList');
-      list.innerHTML = notifs.length
-        ? notifs
-            .map((c) => {
-              const reason = notifReason(c);
-              return `
-        <div class="notif-item" data-notifid="${c.id}">
-          <span class="notif-dot-status" style="background:var(${reason.color});"></span>
+      list.innerHTML = items.length
+        ? items
+            .map(
+              (item) => `
+        <div class="notif-item" data-notifid="${item.id}" data-compromiso="${item.compromisoId}">
+          <span class="notif-dot-status" style="background:var(${item.reason.color});"></span>
           <div>
-            <div class="notif-text">${escapeHtml(c.compromiso)}</div>
-            <div class="notif-meta">${reason.label} · ${escapeHtml(c.responsable || '—')}</div>
+            <div class="notif-text">${escapeHtml(item.compromiso.compromiso)}</div>
+            <div class="notif-meta">${item.reason.label} · ${escapeHtml(item.compromiso.responsable || '—')}</div>
           </div>
         </div>
-      `;
-            })
+      `
+            )
             .join('')
         : '<div class="notif-empty">No tienes notificaciones nuevas.</div>';
       list.querySelectorAll('[data-notifid]').forEach((el) => {
         el.addEventListener('click', () => {
-          const id = Number(el.getAttribute('data-notifid'));
+          const id = el.getAttribute('data-notifid');
+          const compromisoId = el.getAttribute('data-compromiso');
           dismissNotif(id);
           closeNotifDropdown();
-          openEdit(id);
+          openEdit(compromisoId);
         });
       });
       updateBellDot();
@@ -1410,6 +1473,8 @@ export default function Dashboard() {
       eAsignadoPicker.render();
       eSolicitadoPicker.render();
       fillSelect(document.getElementById('eStatus'), STATUS_ORDER, false);
+      fillTipoSelect(document.getElementById('nTipo'));
+      fillTipoSelect(document.getElementById('eTipo'));
 
       renderStats();
       renderList();
@@ -1525,7 +1590,8 @@ export default function Dashboard() {
             <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-soft);padding:3px 0;">
               <span class="avatar" style="width:22px;height:22px;font-size:9.5px;">${initials(m.name)}</span>
               ${escapeHtml(m.name)} <code style="font-size:11px;color:var(--ink-faint);">(${m.username})</code>
-              <span class="badge ${m.role === 'admin' ? 'abierto' : 'nuevo'}" style="margin-left:auto;">${m.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
+              <span class="badge ${m.role === 'admin' ? 'abierto' : 'nuevo'}">${m.role === 'admin' ? 'Administrador' : 'Miembro'}</span>
+              <button type="button" class="btn-remove-member" data-group="${g.groupId}" data-user="${m.username}" style="margin-left:auto;background:none;border:none;color:var(--coral);font-size:11px;cursor:pointer;text-decoration:underline;">Quitar</button>
             </div>
           `
             )
@@ -1534,6 +1600,25 @@ export default function Dashboard() {
       `
         )
         .join('');
+      box.querySelectorAll('.btn-remove-member').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const groupId = btn.getAttribute('data-group');
+          const username = btn.getAttribute('data-user');
+          removeTeamMember(groupId, username);
+        });
+      });
+    }
+
+    async function removeTeamMember(groupId, username) {
+      if (!confirm(`¿Quitar a "${username}" de tu equipo? No perderá acceso a lo que ya se le asignó, solo no podrás asignarle cosas nuevas de ahí en adelante.`)) return;
+      try {
+        await apiSend('/api/team/remove-member', 'POST', { groupId, username });
+        toast('Persona quitada del equipo');
+        await loadMyTeam();
+        loadAll();
+      } catch (e) {
+        toast(e.message || 'No se pudo quitar a la persona');
+      }
     }
 
     async function createMyGroup() {
@@ -1663,10 +1748,11 @@ export default function Dashboard() {
     function openAdd(presetIsoDate) {
       document.getElementById('nCompromiso').value = '';
       document.getElementById('nPromesa').value = presetIsoDate || '';
+      document.getElementById('nPromesa').min = isoToday();
       document.getElementById('nComentarios').value = '';
       document.getElementById('nPrioridad').value = '';
       document.getElementById('nTipo').value = 'General';
-      nAsignadoPicker.setSelected(ME ? [ME.username] : []);
+      nAsignadoPicker.setSelected([]);
       nSolicitadoPicker.setSelected([]);
       document.getElementById('overlayAdd').classList.add('show');
     }
@@ -1733,33 +1819,41 @@ export default function Dashboard() {
         .join('');
     }
 
-    let editingIsCreator = false;
+    let editingCanModify = false;
     function openEdit(id) {
       const c = ALL.find((x) => String(x.id) === String(id));
       if (!c) return;
       editingId = id;
-      editingIsCreator = !!(ME && c.assignedBy === ME.username);
+      editingCanModify = !!c.canModify;
       document.getElementById('editCompromisoTexto').textContent = c.compromiso;
       document.getElementById('eStatus').value = c.status;
       document.getElementById('ePromesa').value = ddmmyyyyToIso(c.promesaCierre);
+      document.getElementById('ePromesa').min = isoToday();
       document.getElementById('ePrioridad').value = c.prioridad || '';
+      fillTipoSelect(document.getElementById('eTipo'));
       document.getElementById('eTipo').value = c.tipo || 'General';
       document.getElementById('eAvance').value = '';
       renderTimeline(c.historial || []);
 
-      document.getElementById('eStatus').disabled = !IS_EDITOR;
-      document.getElementById('ePromesa').disabled = !IS_EDITOR;
-      document.getElementById('ePrioridad').disabled = !IS_EDITOR;
-      document.getElementById('eTipo').disabled = !IS_EDITOR;
-      document.getElementById('editActions').style.display = IS_EDITOR ? 'flex' : 'none';
+      document.getElementById('eStatus').disabled = !editingCanModify;
+      document.getElementById('ePromesa').disabled = !editingCanModify;
+      document.getElementById('ePrioridad').disabled = !editingCanModify;
+      document.getElementById('eTipo').disabled = !editingCanModify;
+      document.getElementById('editActions').style.display = editingCanModify ? 'flex' : 'none';
       document.getElementById('avanceField').style.display = IS_EDITOR ? 'flex' : 'none';
       document.getElementById('btnSaveAvance').style.display = IS_EDITOR ? 'inline-flex' : 'none';
 
-      document.getElementById('eAsignadoPicker').style.display = editingIsCreator ? 'block' : 'none';
-      document.getElementById('eAsignadoReadonly').style.display = editingIsCreator ? 'none' : 'block';
-      document.getElementById('eSolicitadoPicker').style.display = editingIsCreator ? 'block' : 'none';
-      document.getElementById('eSolicitadoReadonly').style.display = editingIsCreator ? 'none' : 'block';
-      if (editingIsCreator) {
+      if (!editingCanModify) {
+        document.getElementById('modifyNotice').style.display = 'block';
+      } else {
+        document.getElementById('modifyNotice').style.display = 'none';
+      }
+
+      document.getElementById('eAsignadoPicker').style.display = editingCanModify ? 'block' : 'none';
+      document.getElementById('eAsignadoReadonly').style.display = editingCanModify ? 'none' : 'block';
+      document.getElementById('eSolicitadoPicker').style.display = editingCanModify ? 'block' : 'none';
+      document.getElementById('eSolicitadoReadonly').style.display = editingCanModify ? 'none' : 'block';
+      if (editingCanModify) {
         eAsignadoPicker.setSelected(c.assignedTo || []);
         eSolicitadoPicker.setSelected(c.solicitadoPorUsernames || []);
       } else {
@@ -1786,7 +1880,7 @@ export default function Dashboard() {
         prioridad,
         tipo: document.getElementById('eTipo').value,
       };
-      if (editingIsCreator) {
+      if (editingCanModify) {
         const assignedTo = eAsignadoPicker.getSelected();
         if (assignedTo.length > 0) updates.assignedTo = assignedTo;
         updates.solicitadoPor = eSolicitadoPicker.getSelected();
@@ -1871,6 +1965,8 @@ export default function Dashboard() {
     document.getElementById('btnAdd').addEventListener('click', () => openAdd());
     document.getElementById('fabAdd').addEventListener('click', () => openAdd());
     document.getElementById('btnCancelAdd').addEventListener('click', closeAdd);
+    document.getElementById('nTipo').addEventListener('change', (e) => handleTipoChange(e.target));
+    document.getElementById('eTipo').addEventListener('change', (e) => handleTipoChange(e.target));
     document.getElementById('btnSaveAdd').addEventListener('click', saveAdd);
     document.getElementById('btnCancelEdit').addEventListener('click', closeEdit);
     document.getElementById('btnSaveEdit').addEventListener('click', saveEdit);
@@ -1906,7 +2002,7 @@ export default function Dashboard() {
       toggleNotifDropdown();
     });
     document.getElementById('btnClearNotifs').addEventListener('click', () => {
-      const ids = getNotifications().map((c) => c.id);
+      const ids = getNotificationItems().map((item) => item.id);
       const dismissed = getDismissed();
       ids.forEach((id) => {
         if (!dismissed.includes(id)) dismissed.push(id);
