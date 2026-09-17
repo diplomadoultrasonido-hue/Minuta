@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { initPushNotifications, listenForegroundMessages } from '../lib/firebaseClient';
 
 const PAGE_STYLES = `
 :root{
@@ -429,9 +428,6 @@ const BODY_HTML = `
         <div class="search-pill" id="searchPillWrap">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
           <input type="text" id="fBuscar" placeholder="Buscar compromiso, departamento...">
-        </div>
-        <div class="icon-btn" id="btnPushNotif" title="Activar notificaciones de escritorio">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
         </div>
         <div class="notif-wrap">
           <div class="icon-btn" id="btnBell" title="Notificaciones">
@@ -2022,37 +2018,6 @@ export default function Dashboard() {
     document.getElementById('btnLogoutMobile').addEventListener('click', logout);
     document.getElementById('btnTheme').addEventListener('click', toggleTheme);
     document.getElementById('btnThemeMobile').addEventListener('click', toggleTheme);
-
-    // ---- Notificaciones de escritorio (Firebase Cloud Messaging) ----
-    function refreshPushButtonState() {
-      const btn = document.getElementById('btnPushNotif');
-      if (!btn || typeof Notification === 'undefined') return;
-      if (Notification.permission === 'granted') {
-        btn.title = 'Notificaciones de escritorio activadas';
-        btn.style.color = 'var(--green)';
-      } else if (Notification.permission === 'denied') {
-        btn.title = 'Notificaciones bloqueadas — actívalas desde los permisos del navegador';
-        btn.style.color = 'var(--coral)';
-      } else {
-        btn.title = 'Activar notificaciones de escritorio';
-        btn.style.color = '';
-      }
-    }
-    refreshPushButtonState();
-    document.getElementById('btnPushNotif').addEventListener('click', async () => {
-      const result = await initPushNotifications();
-      refreshPushButtonState();
-      if (result === 'granted') toast('Notificaciones de escritorio activadas');
-      else if (result === 'denied') toast('Bloqueaste las notificaciones — actívalas desde los permisos del sitio en tu navegador');
-      else if (result === 'unsupported') toast('Tu navegador no soporta notificaciones de escritorio');
-      else toast('No se pudo activar las notificaciones, intenta de nuevo');
-    });
-    listenForegroundMessages((payload) => {
-      const title = (payload.notification && payload.notification.title) || 'Minuta';
-      const body = (payload.notification && payload.notification.body) || '';
-      toast(`${title}${body ? ' — ' + body : ''}`);
-      loadAll();
-    });
     document.getElementById('btnBell').addEventListener('click', (e) => {
       e.stopPropagation();
       toggleNotifDropdown();
