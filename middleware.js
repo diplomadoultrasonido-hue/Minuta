@@ -65,6 +65,7 @@ export const config = {
     '/api/compromiso',
     '/api/compromiso-update',
     '/api/compromiso-avance',
+    '/api/compromiso-delete',
     '/api/import-once',
     '/api/export',
     '/api/profile',

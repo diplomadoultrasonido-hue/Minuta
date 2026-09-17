@@ -670,7 +670,7 @@ const BODY_HTML = `
     <div class="modal-head">
       <h2>Seguimiento del compromiso</h2>
       <p class="modal-sub" id="editCompromisoTexto"></p>
-      <p id="modifyNotice" style="display:none;font-size:12px;background:var(--violet-soft);color:var(--violet-dark);padding:8px 10px;border-radius:8px;margin:0 0 4px;">👁 Este compromiso te lo asignó alguien más — solo quien lo creó o su administrador pueden modificarlo. Tú puedes agregar avances.</p>
+      <p id="modifyNotice" style="display:none;font-size:12px;background:var(--violet-soft);color:var(--violet-dark);padding:8px 10px;border-radius:8px;margin:0 0 4px;">👁 Solo quien aparece en "Solicitado por" o el administrador del equipo pueden modificar o eliminar este compromiso. Tú puedes agregar avances.</p>
     </div>
     <div class="modal-body">
       <div class="row2">
@@ -716,7 +716,8 @@ const BODY_HTML = `
         </div>
         <p id="eSolicitadoReadonly" style="font-size:12.5px;color:var(--ink-soft);margin:4px 0 0;display:none;"></p>
       </div>
-      <div class="modal-actions" id="editActions" style="margin-bottom:2px;">
+      <div class="modal-actions" id="editActions" style="margin-bottom:2px;justify-content:space-between;">
+        <button class="btn btn-ghost" id="btnDeleteCompromiso" style="color:var(--coral);border-color:var(--coral);">Eliminar</button>
         <button class="btn btn-primary" id="btnSaveEdit">Guardar cambios</button>
       </div>
 
@@ -1893,6 +1894,19 @@ export default function Dashboard() {
         toast(e.message || 'No se pudo actualizar');
       }
     }
+
+    async function deleteEditingCompromiso() {
+      if (!editingId) return;
+      if (!confirm('¿Eliminar este compromiso? Esta acción no se puede deshacer.')) return;
+      try {
+        const res = await apiSend('/api/compromiso-delete', 'POST', { id: editingId });
+        onData(res);
+        closeEdit();
+        toast('Compromiso eliminado');
+      } catch (e) {
+        toast(e.message || 'No se pudo eliminar');
+      }
+    }
     async function saveAvance() {
       if (!editingId) return;
       const texto = document.getElementById('eAvance').value.trim();
@@ -1970,6 +1984,7 @@ export default function Dashboard() {
     document.getElementById('btnSaveAdd').addEventListener('click', saveAdd);
     document.getElementById('btnCancelEdit').addEventListener('click', closeEdit);
     document.getElementById('btnSaveEdit').addEventListener('click', saveEdit);
+    document.getElementById('btnDeleteCompromiso').addEventListener('click', deleteEditingCompromiso);
     document.getElementById('btnSaveAvance').addEventListener('click', saveAvance);
     document.getElementById('btnImportar').addEventListener('click', importarInicial);
     document.getElementById('btnChangePhoto').addEventListener('click', () => document.getElementById('photoInput').click());
