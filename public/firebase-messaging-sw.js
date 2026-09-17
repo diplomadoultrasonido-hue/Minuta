@@ -3,20 +3,20 @@
 // mensaje llega con la pestaña cerrada o en segundo plano.
 //
 // Un service worker no puede leer variables de entorno de Next.js, así que
-// aquí abajo hay que copiar A MANO los mismos valores NEXT_PUBLIC_FIREBASE_*
-// que pusiste en tus variables de entorno. No son secretos: Firebase los
-// expone igual en el navegador, así que no hay problema en que estén aquí.
+// estos valores van copiados a mano — son los mismos que pusiste en
+// NEXT_PUBLIC_FIREBASE_*. No son secretos: Firebase los expone igual en el
+// navegador, así que no hay problema en que estén aquí.
 
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
 firebase.initializeApp({
-  apiKey: 'PEGA_AQUI_TU_API_KEY',
-  authDomain: 'TU-PROYECTO.firebaseapp.com',
-  projectId: 'TU-PROYECTO',
-  storageBucket: 'TU-PROYECTO.appspot.com',
-  messagingSenderId: 'TU_MESSAGING_SENDER_ID',
-  appId: 'TU_APP_ID',
+  apiKey: 'AIzaSyAe6TdW1EoXurm1yUzNxeh9YWiPP3Dg63M',
+  authDomain: 'minuta-4fb65.firebaseapp.com',
+  projectId: 'minuta-4fb65',
+  storageBucket: 'minuta-4fb65.firebasestorage.app',
+  messagingSenderId: '753985344221',
+  appId: '1:753985344221:web:1102bcd739454374e34134',
 });
 
 const messaging = firebase.messaging();
