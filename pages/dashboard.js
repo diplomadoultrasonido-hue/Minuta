@@ -31,6 +31,7 @@ const PAGE_STYLES = `
   color-scheme:dark;
 }
 *{box-sizing:border-box;min-width:0;}
+.theme-switching, .theme-switching *, .theme-switching *::before, .theme-switching *::after{transition:none !important;}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:'Inter',sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s ease, color .25s ease, background-color .2s ease;}
 svg{display:block;}
 ::view-transition-old(root),::view-transition-new(root){animation-duration:.22s;animation-timing-function:ease;}
@@ -1950,9 +1951,14 @@ export default function Dashboard() {
       const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
       const next = current === 'dark' ? 'light' : 'dark';
       if (document.startViewTransition) {
-        document.startViewTransition(() => {
+        const root = document.documentElement;
+        root.classList.add('theme-switching');
+        const transition = document.startViewTransition(() => {
           applyTheme(next);
           storeTheme(next);
+        });
+        transition.finished.finally(() => {
+          root.classList.remove('theme-switching');
         });
       } else {
         applyTheme(next);
