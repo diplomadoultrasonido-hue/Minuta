@@ -21,6 +21,16 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Salta la espera y toma control de inmediato — evita el error
+// "Subscription failed - no active Service Worker" la primera vez que se
+// registra.
+self.addEventListener('install', () => {
+  self.skipWaiting();
+});
+self.addEventListener('activate', (event) => {
+  event.waitUntil(self.clients.claim());
+});
+
 // Notificación mostrada cuando la app NO está en primer plano.
 messaging.onBackgroundMessage((payload) => {
   const title = (payload.notification && payload.notification.title) || 'Minuta';
