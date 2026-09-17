@@ -74,5 +74,6 @@ export const config = {
     '/api/team/add-member',
     '/api/team/remove-member',
     '/api/tipos/add',
+    '/api/notifications/register-token',
   ],
 };
